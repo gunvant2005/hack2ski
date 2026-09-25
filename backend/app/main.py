@@ -2,7 +2,7 @@ import os
 import time
 import logging
 from collections import defaultdict
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Request, status, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
@@ -163,6 +163,11 @@ def root():
 @app.get("/api/health", tags=["Health"])
 def health_check():
     return {"status": "ok"}
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 if __name__ == "__main__":
