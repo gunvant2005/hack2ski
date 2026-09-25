@@ -129,10 +129,36 @@ Return ONLY a valid raw JSON object (no markdown surrounding ticks if possible, 
 
     try:
         parsed = json.loads(raw_text)
-        return parsed
+        return _sanitize_analysis_dict(parsed)
     except json.JSONDecodeError:
         print("[AI Service] Gemini output JSON parse error, falling back to heuristic engine.")
         return _analyze_with_heuristic_nlp(filename, full_text, chunks)
+
+
+def _sanitize_analysis_dict(data: dict) -> dict:
+    """Ensure all required keys exist and conform to schema."""
+    if not isinstance(data, dict):
+        data = {}
+    summary = data.get("summary") or {}
+    if not isinstance(summary, dict):
+        summary = {"plain_language_summary": str(summary)}
+    summary.setdefault("plain_language_summary", "Overview of legal terms and commitments.")
+    summary.setdefault("purpose", "Legal agreement governing parties rights and responsibilities.")
+    summary.setdefault("parties", "Specified in document header")
+    summary.setdefault("duration", "Subject to stated term and termination provisions")
+    summary.setdefault("payment_terms", "Specified in compensation schedule")
+    summary.setdefault("termination_conditions", "Subject to written notice provisions")
+    summary.setdefault("important_responsibilities", [])
+
+    data["summary"] = summary
+    if data.get("risk_level") not in ["High", "Medium", "Low"]:
+        data["risk_level"] = "Medium"
+    data["risks"] = data.get("risks") if isinstance(data.get("risks"), list) else []
+    data["obligations"] = data.get("obligations") if isinstance(data.get("obligations"), list) else []
+    data["key_clauses"] = data.get("key_clauses") if isinstance(data.get("key_clauses"), list) else []
+    data["checklist"] = data.get("checklist") if isinstance(data.get("checklist"), list) else []
+    data["lawyer_questions"] = data.get("lawyer_questions") if isinstance(data.get("lawyer_questions"), list) else []
+    return data
 
 
 def _analyze_with_heuristic_nlp(filename: str, full_text: str, chunks: List[Dict[str, Any]]) -> Dict[str, Any]:

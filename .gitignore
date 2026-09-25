@@ -78,3 +78,9 @@ desktop.ini
 # Logs
 *.log
 logs/
+
+*.db-wal
+*.db-shm
+.vercel
+backend/.vercel
+frontend/.vercel

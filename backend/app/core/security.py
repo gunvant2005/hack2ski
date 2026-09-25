@@ -5,11 +5,14 @@ from jose import jwt
 from passlib.context import CryptContext
 from app.core.config import settings
 
-import bcrypt
-if not hasattr(bcrypt, "__about__"):
-    class BcryptAbout:
-        __version__ = getattr(bcrypt, "__version__", "4.0.0")
-    bcrypt.__about__ = BcryptAbout()
+try:
+    import bcrypt
+    if not hasattr(bcrypt, "__about__"):
+        class BcryptAbout:
+            __version__ = getattr(bcrypt, "__version__", "4.0.0")
+        bcrypt.__about__ = BcryptAbout()
+except ImportError:
+    bcrypt = None
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
