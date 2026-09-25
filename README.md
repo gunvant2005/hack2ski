@@ -8,6 +8,17 @@
 
 ---
 
+## 🌐 Live Production Deployments (Vercel)
+
+| Service | Live Production URL | Status |
+| :--- | :--- | :--- |
+| **Frontend Web App** | [https://frontend-ten-rouge-36.vercel.app](https://frontend-ten-rouge-36.vercel.app) | `Active` |
+| **Backend API Service** | [https://backend-mauve-nu-93.vercel.app](https://backend-mauve-nu-93.vercel.app) | `Active` |
+| **Interactive API Docs** | [https://backend-mauve-nu-93.vercel.app/docs](https://backend-mauve-nu-93.vercel.app/docs) | `Active` |
+
+
+---
+
 ## 1. Features & Capabilities
 
 - **Plain-Language Summarization**: Converts dense legal text into understandable summaries highlighting purpose, parties, duration, payment, and termination.
