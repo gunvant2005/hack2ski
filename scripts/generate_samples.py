@@ -1,0 +1,52 @@
+import os
+import docx
+
+os.makedirs('sample_documents', exist_ok=True)
+
+# 1. Consulting Agreement v1
+doc1 = docx.Document()
+doc1.add_heading('CONSULTING SERVICES AGREEMENT (Version 1.0)', 0)
+doc1.add_paragraph('This Consulting Services Agreement is entered into on October 1, 2026, by and between CloudScale Inc. ("Client") and Sarah Lin ("Consultant").')
+doc1.add_heading('1. Scope of Work', level=1)
+doc1.add_paragraph('Consultant will provide senior cloud architecture design and technical advisory services.')
+doc1.add_heading('2. Payment Terms', level=1)
+doc1.add_paragraph('Client shall pay Consultant a fixed rate of $150 per hour. Invoices shall be rendered monthly and paid within Net 30 days.')
+doc1.add_heading('3. Term and Termination', level=1)
+doc1.add_paragraph('This Agreement shall commence on October 1, 2026 and continue for a term of six (6) months. Either party may terminate upon thirty (30) days prior written notice.')
+doc1.add_heading('4. Limitation of Liability', level=1)
+doc1.add_paragraph('Consultant liability under this agreement shall be strictly capped at the total amount received in the preceding three months.')
+doc1.add_heading('5. Governing Law', level=1)
+doc1.add_paragraph('This Agreement shall be governed by and construed under the laws of the State of California.')
+doc1.save('sample_documents/Consulting_Agreement_v1.docx')
+
+# 2. Consulting Agreement v2 (Revised with changes for side-by-side comparison)
+doc2 = docx.Document()
+doc2.add_heading('CONSULTING SERVICES AGREEMENT (Version 2.0 Revised)', 0)
+doc2.add_paragraph('This Consulting Services Agreement is entered into on October 1, 2026, by and between CloudScale Inc. ("Client") and Sarah Lin ("Consultant").')
+doc2.add_heading('1. Scope of Work', level=1)
+doc2.add_paragraph('Consultant will provide senior cloud architecture design, DevOps deployment, and 24/7 on-call technical advisory services.')
+doc2.add_heading('2. Payment Terms', level=1)
+doc2.add_paragraph('Client shall pay Consultant a fixed rate of $150 per hour. Invoices shall be rendered monthly and paid within Net 15 days, with a 2% monthly late payment surcharge.')
+doc2.add_heading('3. Term and Termination', level=1)
+doc2.add_paragraph('This Agreement shall commence on October 1, 2026 and continue for a term of twelve (12) months. Either party may terminate only upon sixty (60) days prior written notice.')
+doc2.add_heading('4. Limitation of Liability & Indemnification', level=1)
+doc2.add_paragraph('Consultant agrees to broadly indemnify Client against all third-party legal claims. Liability for indirect, consequential, or special damages shall be uncapped.')
+doc2.add_heading('5. Post-Engagement Non-Compete (Added Clause)', level=1)
+doc2.add_paragraph('For a period of 12 months following termination, Consultant shall not provide similar cloud architecture services to any competitor operating within a 100-mile radius.')
+doc2.add_heading('6. Governing Law & Mandatory Arbitration', level=1)
+doc2.add_paragraph('This Agreement shall be governed by the laws of Delaware. All disputes shall be resolved exclusively through final and binding arbitration in Dover, Delaware.')
+doc2.save('sample_documents/Consulting_Agreement_v2_Revised.docx')
+
+# 3. Mutual NDA
+doc3 = docx.Document()
+doc3.add_heading('MUTUAL NON-DISCLOSURE AGREEMENT', 0)
+doc3.add_paragraph('This Mutual Non-Disclosure Agreement is made by and between Alpha Corp and Beta Ventures LLC.')
+doc3.add_heading('1. Confidential Information', level=1)
+doc3.add_paragraph('Each party agrees to maintain all proprietary technical, financial, and strategic information in strict confidence.')
+doc3.add_heading('2. Exclusions', level=1)
+doc3.add_paragraph('Confidential information does not include information publicly known or already rightfully in possession.')
+doc3.add_heading('3. Term', level=1)
+doc3.add_paragraph('This agreement remains in effect for three (3) years from execution.')
+doc3.save('sample_documents/Mutual_NDA_Agreement.docx')
+
+print('All 3 sample documents created successfully in sample_documents/')

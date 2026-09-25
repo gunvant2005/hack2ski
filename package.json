@@ -1,0 +1,26 @@
+{
+  "name": "legallens-ai-platform",
+  "version": "1.0.0",
+  "description": "LegalLens AI - Full-Stack GenAI Legal Assistance Platform",
+  "workspaces": [
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "node -e \"process.chdir('frontend'); require('child_process').execSync('npm run dev', {stdio: 'inherit'})\"",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "call start-backend.bat",
+    "build": "node -e \"process.chdir('frontend'); require('child_process').execSync('npm run build', {stdio: 'inherit'})\"",
+    "start": "node -e \"process.chdir('frontend'); require('child_process').execSync('npm run start', {stdio: 'inherit'})\"",
+    "install:all": "npm install --prefix frontend",
+    "test": "node -e \"process.chdir('frontend'); require('child_process').execSync('npm run build', {stdio: 'inherit'})\""
+  },
+  "keywords": [
+    "legal-ai",
+    "genai",
+    "fastapi",
+    "nextjs",
+    "rag"
+  ],
+  "author": "",
+  "license": "MIT"
+}
