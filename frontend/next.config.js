@@ -1,10 +1,8 @@
 /** @type {import('next').NextConfig} */
 const envBackend = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_API_URL || '';
-const rawBackend = (envBackend && envBackend.startsWith('http'))
-  ? envBackend
-  : 'https://backend-mauve-nu-93.vercel.app/api';
-const cleanBackend = rawBackend.endsWith('/') ? rawBackend.slice(0, -1) : rawBackend;
-const targetBase = cleanBackend.endsWith('/api') ? cleanBackend : `${cleanBackend}/api`;
+const hasExternalBackend = Boolean(envBackend && envBackend.startsWith('http') && !envBackend.includes('backend-mauve-nu-93'));
+const cleanBackend = hasExternalBackend ? (envBackend.endsWith('/') ? envBackend.slice(0, -1) : envBackend) : '';
+const targetBase = cleanBackend ? (cleanBackend.endsWith('/api') ? cleanBackend : `${cleanBackend}/api`) : '';
 
 const nextConfig = {
   reactStrictMode: true,
@@ -23,6 +21,9 @@ const nextConfig = {
     ];
   },
   async rewrites() {
+    if (!targetBase) {
+      return [];
+    }
     return [
       {
         source: '/api/:path*',

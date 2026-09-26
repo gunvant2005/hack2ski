@@ -12,7 +12,8 @@ import {
   ChatMessage,
 } from './types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? '/api' : 'https://backend-mauve-nu-93.vercel.app/api');
+const envApi = process.env.NEXT_PUBLIC_API_URL || '';
+const API_BASE_URL = (envApi && !envApi.includes('backend-mauve-nu-93')) ? envApi : '/api';
 
 // ---------------------------------------------------------------------------
 // Token helpers — SSR-safe wrappers
