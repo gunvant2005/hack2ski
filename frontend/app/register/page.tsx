@@ -21,8 +21,8 @@ export default function RegisterPage() {
     e.preventDefault();
     setError('');
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters long.');
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters long.');
       return;
     }
 
@@ -127,6 +127,7 @@ export default function RegisterPage() {
                 )}
               </button>
             </div>
+            <p className="text-[10px] text-slate-400 mt-1">Must be at least 8 characters</p>
           </div>
 
           <div>

@@ -23,11 +23,20 @@ def extract_text_from_file(file_path: str) -> List[Dict[str, Any]]:
                     })
             doc.close()
         except Exception as e:
-            # Fallback text extractor if fitz has an issue
-            pages_data.append({
-                "page_number": 1,
-                "text": f"Error parsing PDF with fitz: {str(e)}"
-            })
+            # Secondary fallback: Pure-Python pypdf parser
+            try:
+                import pypdf
+                reader = pypdf.PdfReader(file_path)
+                for i, page in enumerate(reader.pages):
+                    t = page.extract_text() or ""
+                    if t.strip():
+                        pages_data.append({
+                            "page_number": i + 1,
+                            "text": t.strip()
+                        })
+            except Exception as e2:
+                # Both parsers failed; leave pages_data empty so clean 422 is returned
+                pass
     elif ext in [".docx", ".doc"]:
         try:
             import docx
@@ -54,19 +63,17 @@ def extract_text_from_file(file_path: str) -> List[Dict[str, Any]]:
                     "page_number": page_num,
                     "text": "\n".join(current_page_text)
                 })
-        except Exception as e:
-            pages_data.append({
-                "page_number": 1,
-                "text": f"Error parsing DOCX: {str(e)}"
-            })
+        except Exception:
+            pass
     else:
         # Plain text fallback
         try:
             with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
                 text = f.read()
-                pages_data.append({"page_number": 1, "text": text})
+                if text.strip():
+                    pages_data.append({"page_number": 1, "text": text.strip()})
         except Exception:
-            pages_data.append({"page_number": 1, "text": "Unsupported file format."})
+            pass
 
     return pages_data
 

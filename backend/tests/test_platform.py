@@ -112,3 +112,64 @@ def test_rag_pipeline_answer_and_disclaimer():
     assert len(res["sources"]) >= 1
     assert res["sources"][0]["clause_number"] == "Clause 4.1"
     assert "does not replace professional legal advice" in res["disclaimer"].lower()
+
+
+def test_chat_request_flexible_payload():
+    from app.schemas.schemas import ChatRequest
+    # Verify standard message
+    c1 = ChatRequest(document_id="doc-123", message="How to terminate?")
+    assert c1.message == "How to terminate?"
+
+    # Verify 'question' alias
+    c2 = ChatRequest.model_validate({"document_id": "doc-123", "question": "What are payment terms?"})
+    assert c2.message == "What are payment terms?"
+
+    # Verify 'query' alias
+    c3 = ChatRequest.model_validate({"document_id": "doc-123", "query": "Is there a non-compete?"})
+    assert c3.message == "Is there a non-compete?"
+
+
+def test_user_create_validation():
+    from app.schemas.schemas import UserCreate
+    # Valid user
+    u = UserCreate(name="  Jane Doe  ", email="  Jane.Doe@EXAMPLE.COM  ", password="SecurePassword123!")
+    assert u.name == "Jane Doe"
+    assert u.email == "jane.doe@example.com"
+
+    # Password too short (< 8 chars)
+    with pytest.raises(ValueError):
+        UserCreate(name="Jane", email="jane@example.com", password="short")
+
+
+def test_sanitize_filename_helper():
+    from app.api.compare import _sanitize_filename
+    assert _sanitize_filename("valid_contract.pdf") == "valid_contract.pdf"
+    assert _sanitize_filename("../../../etc/passwd") == "passwd"
+    assert _sanitize_filename("..\\..\\secret.docx") == "secret.docx"
+    assert _sanitize_filename("") == "upload"
+    assert "\0" not in _sanitize_filename("bad\0file.pdf")
+
+
+def test_chat_and_comparison_response_sync():
+    from app.schemas.schemas import ChatResponse, ComparisonResponse
+    # ChatResponse auto-populates answer from reply
+    cr = ChatResponse(reply="Test reply message", sources=[])
+    assert cr.reply == "Test reply message"
+    assert cr.answer == "Test reply message"
+
+    # ComparisonResponse auto-populates doc_a_name and doc_b_name from doc_a_filename and doc_b_filename
+    cmp = ComparisonResponse(
+        doc_a_filename="Contract_A.pdf",
+        doc_b_filename="Contract_B.pdf",
+        total_changes=0,
+        high_importance_changes=0,
+        added_count=0,
+        removed_count=0,
+        modified_count=0,
+        changes=[]
+    )
+    assert cmp.doc_a_name == "Contract_A.pdf"
+    assert cmp.doc_b_name == "Contract_B.pdf"
+
+
+

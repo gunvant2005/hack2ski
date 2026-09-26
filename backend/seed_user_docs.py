@@ -3,10 +3,19 @@ import json
 import uuid
 import os
 
-login_data = json.dumps({'email': 'iwanttobehokaga@gmail.com', 'password': 'naruto@2004'}).encode('utf-8')
+seed_email = os.getenv("SEED_USER_EMAIL", "demo@legallens.ai")
+seed_password = os.getenv("SEED_USER_PASSWORD", "DemoSecurePassword@2026")
+login_data = json.dumps({'email': seed_email, 'password': seed_password}).encode('utf-8')
 req = urllib.request.Request('http://127.0.0.1:8000/api/auth/login', data=login_data, headers={'Content-Type': 'application/json'})
-with urllib.request.urlopen(req) as resp:
-    token = json.loads(resp.read().decode('utf-8'))['access_token']
+try:
+    with urllib.request.urlopen(req) as resp:
+        token = json.loads(resp.read().decode('utf-8'))['access_token']
+except Exception:
+    # Auto-register test account if not already present
+    reg_data = json.dumps({'name': 'Demo User', 'email': seed_email, 'password': seed_password}).encode('utf-8')
+    reg_req = urllib.request.Request('http://127.0.0.1:8000/api/auth/register', data=reg_data, headers={'Content-Type': 'application/json'})
+    with urllib.request.urlopen(reg_req) as resp:
+        token = json.loads(resp.read().decode('utf-8'))['access_token']
 print('Authenticated token obtained!')
 
 def upload_file(filepath):

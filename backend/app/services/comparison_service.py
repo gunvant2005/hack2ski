@@ -1,6 +1,9 @@
 import re
+import logging
 from typing import Dict, Any, List
 from app.core.config import settings
+
+logger = logging.getLogger("legallens.comparison")
 
 
 # ---------------------------------------------------------------------------
@@ -134,7 +137,10 @@ Guidelines:
 - Do NOT provide legal advice. Use objective, descriptive language.
 """
 
-    candidate_models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
+    import os
+    preferred_model = os.getenv("GEMINI_MODEL", "").strip()
+    raw_candidates = [preferred_model, "gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.0-flash-lite", "gemini-1.5-pro"]
+    candidate_models = list(dict.fromkeys([m for m in raw_candidates if m]))
 
     for model in candidate_models:
         try:
@@ -150,7 +156,7 @@ Guidelines:
                     import json
                     return json.loads(arr_match.group(1))
         except Exception as err:
-            print(f"[ComparisonService] Gemini model {model} failed: {err}. Trying next...")
+            logger.info(f"Gemini model {model} failed: {err}. Trying next...")
 
     return []  # empty means we'll fall back to NLP
 
@@ -178,7 +184,7 @@ def compare_legal_documents(
             if gemini_changes:
                 changes = gemini_changes
         except Exception as e:
-            print(f"[ComparisonService] Gemini comparison failed: {e}. Using NLP engine.")
+            logger.warning(f"Gemini comparison failed: {e}. Using NLP engine.")
 
     if not changes:
         changes = _diff_clauses_nlp(doc_a_text, doc_b_text)
@@ -192,6 +198,8 @@ def compare_legal_documents(
     return {
         "doc_a_filename": doc_a_filename,
         "doc_b_filename": doc_b_filename,
+        "doc_a_name": doc_a_filename,
+        "doc_b_name": doc_b_filename,
         "total_changes": len(changes),
         "high_importance_changes": high_imp,
         "added_count": added_cnt,

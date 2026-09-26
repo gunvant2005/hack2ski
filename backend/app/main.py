@@ -92,7 +92,11 @@ MAX_AUTH_ATTEMPTS = 30  # generous for normal users, blocks brute-force bots
 async def rate_limit_auth_endpoints(request: Request, call_next):
     path = request.url.path
     if path.endswith("/auth/login") or path.endswith("/auth/register"):
-        client_ip = request.client.host if request.client else "unknown"
+        forwarded = request.headers.get("x-forwarded-for", "")
+        if forwarded:
+            client_ip = forwarded.split(",")[0].strip()
+        else:
+            client_ip = request.headers.get("x-real-ip") or (request.client.host if request.client else "unknown")
         now = time.time()
         timestamps = _auth_rate_limit[client_ip]
         # Keep only timestamps within the sliding window

@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
-const rawBackend = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_API_URL || 'https://backend-mauve-nu-93.vercel.app/api';
+const envBackend = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_API_URL || '';
+const rawBackend = (envBackend && envBackend.startsWith('http'))
+  ? envBackend
+  : 'https://backend-mauve-nu-93.vercel.app/api';
 const cleanBackend = rawBackend.endsWith('/') ? rawBackend.slice(0, -1) : rawBackend;
 const targetBase = cleanBackend.endsWith('/api') ? cleanBackend : `${cleanBackend}/api`;
 

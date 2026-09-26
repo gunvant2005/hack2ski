@@ -90,10 +90,17 @@ def ask_document_question_by_path(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    msg = req.get("message") or req.get("query") or ""
-    if not msg.strip():
+    msg = (
+        req.get("message")
+        or req.get("question")
+        or req.get("query")
+        or req.get("prompt")
+        or req.get("text")
+        or ""
+    )
+    if not str(msg).strip():
         raise HTTPException(status_code=422, detail="Message cannot be empty")
-    return _process_chat_query(document_id, msg.strip(), current_user, db)
+    return _process_chat_query(document_id, str(msg).strip(), current_user, db)
 
 
 @router.get("/{document_id}/history", response_model=List[ChatMessageOut])

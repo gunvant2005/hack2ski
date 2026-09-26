@@ -32,32 +32,41 @@ import {
   askDocumentQuestion,
   getChatHistory
 } from '../../../lib/api';
+import {
+  DocumentItem,
+  DocumentSummary,
+  KeyClause,
+  RisksResponse,
+  ChecklistItem,
+  DocumentChunk,
+  ChatMessage
+} from '../../../lib/types';
 
 export default function DocumentAnalysisPage() {
   const params = useParams();
   const router = useRouter();
   const documentId = params.id as string;
 
-  const [documentMeta, setDocumentMeta] = useState<any>(null);
+  const [documentMeta, setDocumentMeta] = useState<DocumentItem | null>(null);
   const [activeTab, setActiveTab] = useState<'summary' | 'clauses' | 'risks' | 'chat' | 'checklist' | 'lawyer'>('summary');
   const [loading, setLoading] = useState(true);
 
   const [error, setError] = useState<string | null>(null);
 
   // Tab Data States
-  const [summaryData, setSummaryData] = useState<any>(null);
-  const [clausesData, setClausesData] = useState<any[]>([]);
-  const [risksData, setRisksData] = useState<any>(null);
-  const [checklistData, setChecklistData] = useState<any[]>([]);
+  const [summaryData, setSummaryData] = useState<DocumentSummary | null>(null);
+  const [clausesData, setClausesData] = useState<KeyClause[]>([]);
+  const [risksData, setRisksData] = useState<RisksResponse | null>(null);
+  const [checklistData, setChecklistData] = useState<ChecklistItem[]>([]);
   const [lawyerQuestionsData, setLawyerQuestionsData] = useState<string[]>([]);
 
   // Real Document Content States
-  const [chunks, setChunks] = useState<any[]>([]);
+  const [chunks, setChunks] = useState<DocumentChunk[]>([]);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [highlightedChunkId, setHighlightedChunkId] = useState<string | null>(null);
 
   // Q&A Chat States
-  const [chatMessages, setChatMessages] = useState<Array<{ role: string; text: string; sources?: any[] }>>([
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
       role: 'assistant',
       text: 'Hello! I am your LegalLens AI Assistant. Ask me any question about this document, such as termination notice periods, payment terms, or renewal conditions.'
@@ -139,7 +148,7 @@ export default function DocumentAnalysisPage() {
         ...prev,
         {
           role: 'assistant',
-          text: res.reply,
+          text: res.reply || (res as any).answer || '',
           sources: res.sources
         }
       ]);
@@ -167,6 +176,134 @@ export default function DocumentAnalysisPage() {
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleExportMarkdown = () => {
+    if (!summaryData) return;
+    const md = `# LegalLens AI — Legal Intelligence Report
+
+**Document:** ${documentMeta?.filename || 'Document'}  
+**Overall Attention Level:** ${risksData?.risk_level || 'Low'}  
+**Analysis Date:** ${new Date().toLocaleDateString()}  
+
+---
+
+## 1. Executive Plain-Language Summary
+${summaryData.plain_language_summary || ''}
+
+- **Core Purpose:** ${summaryData.purpose || 'N/A'}
+- **Parties:** ${summaryData.parties || 'N/A'}
+- **Duration / Term:** ${summaryData.duration || 'N/A'}
+- **Payment Terms:** ${summaryData.payment_terms || 'N/A'}
+- **Termination Conditions:** ${summaryData.termination_conditions || 'N/A'}
+
+### Important Responsibilities
+${(summaryData.important_responsibilities || []).map((r: string, i: number) => `${i + 1}. ${r}`).join('\n')}
+
+---
+
+## 2. Attention Radar (Risks & Warning Areas)
+${(risksData?.risks || []).map((r: any, i: number) => `
+### ${i + 1}. [${r.severity.toUpperCase()} RISK] ${r.title}
+- **Clause Reference:** ${r.clause_number || 'General'} (Page ${r.page_number || 1})
+- **Plain-English Explanation:** ${r.explanation}
+- **Why Attention Is Warranted:** ${r.why_attention}
+- **Suggested Question for Legal Counsel:** *"${r.suggested_lawyer_question}"*
+`).join('\n')}
+
+---
+
+## 3. Extracted Key Clauses
+${clausesData.map((c: any, i: number) => `
+### ${i + 1}. [${c.category}] ${c.title} — ${c.importance} Importance
+- **Clause Reference:** ${c.clause_number || 'Section'} (Page ${c.page_number || 1})
+- **Explanation:** ${c.explanation}
+`).join('\n')}
+
+---
+
+## 4. Pre-Signing Verification Checklist
+${checklistData.map((item: any) => `- [${item.completed ? 'x' : ' '}] ${item.task} *(${item.category})*`).join('\n')}
+
+---
+
+## 5. Recommended Questions for Legal Counsel
+${lawyerQuestionsData.map((q: string, i: number) => `${i + 1}. ${q}`).join('\n')}
+
+---
+
+> **Disclaimer:** LegalLens AI provides general legal information and document assistance. It does not replace professional legal advice from a qualified attorney.
+`;
+
+    const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${(documentMeta?.filename || 'document').replace(/\.[^/.]+$/, '')}_LegalLens_Report.md`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportReport = () => {
+    if (!summaryData) return;
+
+    let report = `================================================================================
+LEGALLENS AI — DOCUMENT INTELLIGENCE REPORT
+================================================================================
+Document: ${documentMeta?.filename || 'Document'}
+Overall Attention Level: ${risksData?.risk_level || 'Low'}
+Date: ${new Date().toLocaleDateString()}
+
+1. PLAIN-LANGUAGE SUMMARY
+--------------------------------------------------------------------------------
+${summaryData.plain_language_summary || ''}
+
+Purpose: ${summaryData.purpose || 'N/A'}
+Parties: ${summaryData.parties || 'N/A'}
+Duration: ${summaryData.duration || 'N/A'}
+Payment Terms: ${summaryData.payment_terms || 'N/A'}
+Termination Conditions: ${summaryData.termination_conditions || 'N/A'}
+
+Key Responsibilities:
+${(summaryData.important_responsibilities || []).map((r: string, i: number) => `  ${i + 1}. ${r}`).join('\n')}
+
+2. ATTENTION RADAR (POTENTIAL RISKS & CRITICAL CLAUSES)
+--------------------------------------------------------------------------------
+${(risksData?.risks || []).map((r: any, i: number) => `
+[${r.severity.toUpperCase()} SEVERITY] ${r.title} (${r.clause_number}, Page ${r.page_number})
+- Explanation: ${r.explanation}
+- Why Attention Needed: ${r.why_attention}
+- Question for Lawyer: ${r.suggested_lawyer_question}
+`).join('\n')}
+
+3. EXTRACTED KEY CLAUSES
+--------------------------------------------------------------------------------
+${clausesData.map((c: any, i: number) => `
+${i + 1}. [${c.category}] ${c.title} (${c.clause_number}, Page ${c.page_number}) - ${c.importance} Importance
+${c.explanation}
+`).join('\n')}
+
+4. PRE-SIGNING VERIFICATION CHECKLIST
+--------------------------------------------------------------------------------
+${checklistData.map((item: any) => `[${item.completed ? 'X' : ' '}] ${item.task} (${item.category})`).join('\n')}
+
+5. QUESTIONS TO DISCUSS WITH A LAWYER
+--------------------------------------------------------------------------------
+${lawyerQuestionsData.map((q: string, i: number) => `${i + 1}. ${q}`).join('\n')}
+
+================================================================================
+DISCLAIMER: LegalLens AI provides general legal information and document assistance.
+It does not replace professional legal advice from a qualified attorney.
+================================================================================
+`;
+
+    const blob = new Blob([report], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${(documentMeta?.filename || 'document').replace(/\.[^/.]+$/, '')}_LegalLens_Report.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   const jumpToSourcePage = useCallback((pageNum: number, chunkId?: string) => {
@@ -248,6 +385,32 @@ export default function DocumentAnalysisPage() {
               {documentMeta?.filename || 'Legal_Document.pdf'}
             </h1>
             <p className="text-[11px] text-slate-500">GenAI Document Intelligence Workspace</p>
+          </div>
+          <div className="flex items-center gap-1.5 ml-2">
+            <button
+              onClick={handleExportMarkdown}
+              className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold flex items-center gap-1 transition-all shadow-subtle active:scale-[0.97]"
+              title="Download structured Markdown report (.md)"
+            >
+              <Download className="w-3.5 h-3.5 text-slate-700" />
+              <span className="hidden sm:inline">Export (.md)</span>
+            </button>
+            <button
+              onClick={handleExportReport}
+              className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold flex items-center gap-1 transition-all shadow-subtle active:scale-[0.97]"
+              title="Download text report (.txt)"
+            >
+              <FileText className="w-3.5 h-3.5 text-slate-700" />
+              <span className="hidden sm:inline">Export (.txt)</span>
+            </button>
+            <button
+              onClick={() => window.print()}
+              className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold flex items-center gap-1 transition-all shadow-subtle active:scale-[0.97]"
+              title="Print or Save as PDF"
+            >
+              <Copy className="w-3.5 h-3.5 text-slate-700" />
+              <span className="hidden sm:inline">Print / PDF</span>
+            </button>
           </div>
         </div>
 
@@ -653,7 +816,21 @@ export default function DocumentAnalysisPage() {
                           : 'bg-slate-50 text-slate-800 border border-slate-200/80 rounded-bl-none font-normal'
                       }`}
                     >
-                      <p>{msg.text}</p>
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="flex-1 whitespace-pre-wrap">{msg.text}</p>
+                        {msg.role === 'assistant' && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(msg.text);
+                            }}
+                            className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded transition-colors self-start shrink-0"
+                            title="Copy answer"
+                          >
+                            <Copy className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
 
                       {msg.sources && msg.sources.length > 0 && (
                         <div className="pt-2 border-t border-slate-200/80 space-y-1">

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, EmailStr, field_validator, model_validator
 from pydantic import ConfigDict
 from typing import List, Optional, Any, Dict
 from datetime import datetime
@@ -19,6 +19,11 @@ class UserCreate(BaseModel):
             raise ValueError("Name must not be blank")
         return v.strip()
 
+    @field_validator("email")
+    @classmethod
+    def email_normalize(cls, v: str) -> str:
+        return str(v).strip().lower()
+
     @field_validator("password")
     @classmethod
     def password_min_length(cls, v: str) -> str:
@@ -30,6 +35,11 @@ class UserCreate(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+    @field_validator("email")
+    @classmethod
+    def email_normalize(cls, v: str) -> str:
+        return str(v).strip().lower()
 
 
 class UserOut(BaseModel):
@@ -122,13 +132,25 @@ class AnalysisResultOut(BaseModel):
 # ---------------------------------------------------------------------------
 class SourceCitation(BaseModel):
     clause_number: Optional[str] = None
-    page_number: int
-    snippet: str
+    page_number: Optional[int] = 1
+    snippet: Optional[str] = ""
+    text: Optional[str] = None
 
 
 class ChatRequest(BaseModel):
     document_id: str
     message: str
+
+    @model_validator(mode="before")
+    @classmethod
+    def resolve_fields(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            if "message" not in data or not data["message"]:
+                for alt in ["question", "query", "prompt", "text"]:
+                    if data.get(alt):
+                        data["message"] = data[alt]
+                        break
+        return data
 
     @field_validator("message")
     @classmethod
@@ -150,11 +172,18 @@ class ChatMessageOut(BaseModel):
 
 class ChatResponse(BaseModel):
     reply: str
+    answer: Optional[str] = None
     sources: List[SourceCitation]
     disclaimer: str = (
         "LegalLens AI provides general legal information and document assistance. "
         "It does not replace professional legal advice from a qualified attorney."
     )
+
+    @model_validator(mode="after")
+    def sync_answer(self):
+        if not self.answer:
+            self.answer = self.reply
+        return self
 
 
 # ---------------------------------------------------------------------------
@@ -172,9 +201,19 @@ class ClauseDiffItem(BaseModel):
 class ComparisonResponse(BaseModel):
     doc_a_filename: str
     doc_b_filename: str
+    doc_a_name: Optional[str] = None
+    doc_b_name: Optional[str] = None
     total_changes: int
     high_importance_changes: int
     added_count: int
     removed_count: int
     modified_count: int
     changes: List[ClauseDiffItem]
+
+    @model_validator(mode="after")
+    def sync_names(self):
+        if not self.doc_a_name:
+            self.doc_a_name = self.doc_a_filename
+        if not self.doc_b_name:
+            self.doc_b_name = self.doc_b_filename
+        return self

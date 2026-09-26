@@ -231,9 +231,18 @@ def analyze_document_endpoint(
     if doc.analysis:
         return doc.analysis
 
-    pages_data = extract_text_from_file(doc.file_path)
-    chunks = chunk_document_pages(pages_data)
-    full_text = "\n\n".join(c["text"] for c in chunks)
+    if doc.chunks and len(doc.chunks) > 0:
+        chunks = [{"text": c.chunk_text, "page_number": c.page_number, "clause_number": c.clause_number} for c in doc.chunks]
+        full_text = "\n\n".join(c["text"] for c in chunks)
+    elif doc.file_path and os.path.isfile(doc.file_path):
+        pages_data = extract_text_from_file(doc.file_path)
+        chunks = chunk_document_pages(pages_data)
+        full_text = "\n\n".join(c["text"] for c in chunks)
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Document text is not available for analysis. Please re-upload the document."
+        )
 
     analysis_data = analyze_document_content(doc.filename, full_text, chunks)
 
