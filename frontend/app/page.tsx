@@ -39,7 +39,7 @@ export default function LandingPage() {
             {/* Left Content */}
             <div className="lg:col-span-7 space-y-7">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-800 text-xs font-semibold tracking-wide">
-                <Sparkles className="w-3.5 h-3.5 text-slate-700" />
+                <Sparkles className="w-3.5 h-3.5 text-slate-700" aria-hidden="true" />
                 <span>Full-Stack Generative AI Legal Intelligence Platform</span>
               </div>
 

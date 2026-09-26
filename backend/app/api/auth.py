@@ -6,7 +6,13 @@ from datetime import timedelta
 from app.database.session import get_db
 from app.models.all_models import User
 from app.schemas.schemas import UserCreate, UserLogin, UserOut, Token
-from app.core.security import verify_password, get_password_hash, create_access_token, decode_access_token
+from app.core.security import (
+    verify_password,
+    get_password_hash,
+    create_access_token,
+    decode_access_token,
+    invalidate_token,
+)
 from app.core.config import settings
 
 logger = logging.getLogger("legallens.auth")
@@ -73,7 +79,6 @@ def login(user_in: UserLogin, db: Session = Depends(get_db)):
     clean_email = user_in.email.strip().lower()
     user = db.query(User).filter(User.email == clean_email).first()
     if not user or not verify_password(user_in.password, user.password_hash):
-        # Deliberately vague to prevent email enumeration
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password.",
@@ -88,6 +93,25 @@ def login(user_in: UserLogin, db: Session = Depends(get_db)):
     access_token = create_access_token(subject=user.id)
     logger.info(f"User logged in: {user.email}")
     return {"access_token": access_token, "token_type": "bearer", "user": user}
+
+
+@router.post("/logout", status_code=status.HTTP_200_OK)
+def logout(
+    token: str = Depends(oauth2_scheme),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Client-side logout: invalidates the current bearer token server-side
+    so it can no longer be used to authenticate requests (even within its
+    natural expiration window).
+    """
+    if token:
+        try:
+            invalidate_token(token)
+        except Exception as e:
+            logger.warning(f"Token invalidation failed gracefully: {e}")
+    logger.info(f"User {current_user.id} logged out.")
+    return {"message": "Logged out successfully"}
 
 
 @router.get("/me", response_model=UserOut)

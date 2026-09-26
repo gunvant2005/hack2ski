@@ -22,8 +22,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`h-full ${jakarta.variable}`}>
       <body className="flex flex-col min-h-screen bg-[#FAFBFD] text-slate-900 font-sans antialiased selection:bg-slate-900 selection:text-white">
+        <a href="#main-content" className="skip-link">Skip to main content</a>
         <Navbar />
-        <main className="flex-grow">{children}</main>
+        <main id="main-content" role="main" className="flex-grow">{children}</main>
+        <div id="live-region" role="status" aria-live="polite" aria-atomic="true" className="sr-only"></div>
         <Footer />
       </body>
     </html>

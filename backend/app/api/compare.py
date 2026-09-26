@@ -8,16 +8,13 @@ from app.models.all_models import User, Document
 from app.schemas.schemas import ComparisonResponse
 from app.api.auth import get_current_user
 from app.core.config import settings
+from app.core.security import sanitize_filename
 from app.services.document_processor import extract_text_from_file
 from app.services.comparison_service import compare_legal_documents
 
 logger = logging.getLogger("legallens.compare")
 
 router = APIRouter(prefix="/compare", tags=["Document Comparison"])
-
-
-def _sanitize_filename(filename: str) -> str:
-    return os.path.basename(filename or "upload").replace("\0", "").strip() or "upload"
 
 
 @router.post("", response_model=ComparisonResponse)
@@ -40,7 +37,7 @@ async def compare_documents_endpoint(
     except Exception:
         pass
 
-    allowed_exts = {".pdf", ".docx", ".doc", ".txt"}
+    allowed_exts = {e.lower() for e in settings.ALLOWED_UPLOAD_EXTENSIONS}
     max_bytes = settings.MAX_UPLOAD_SIZE_MB * 1024 * 1024
 
     text_a = ""
@@ -67,12 +64,13 @@ async def compare_documents_endpoint(
         else:
             text_a = ""
     elif doc_a and doc_a.filename:
-        clean_name = _sanitize_filename(doc_a.filename)
+        clean_name = sanitize_filename(doc_a.filename)
         ext_a = os.path.splitext(clean_name)[1].lower()
         if ext_a not in allowed_exts:
+            pretty = ", ".join(sorted(allowed_exts))
             raise HTTPException(
                 status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-                detail=f"Unsupported format for Document A ({ext_a}). Only PDF, DOCX, and TXT files are supported.",
+                detail=f"Unsupported format for Document A ({ext_a}). Supported: {pretty}.",
             )
         save_path_a = os.path.join(settings.UPLOAD_DIR, f"cmp_a_{current_user.id}_{clean_name}")
         try:
@@ -120,12 +118,13 @@ async def compare_documents_endpoint(
         else:
             text_b = ""
     elif doc_b and doc_b.filename:
-        clean_name = _sanitize_filename(doc_b.filename)
+        clean_name = sanitize_filename(doc_b.filename)
         ext_b = os.path.splitext(clean_name)[1].lower()
         if ext_b not in allowed_exts:
+            pretty = ", ".join(sorted(allowed_exts))
             raise HTTPException(
                 status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-                detail=f"Unsupported format for Document B ({ext_b}). Only PDF, DOCX, and TXT files are supported.",
+                detail=f"Unsupported format for Document B ({ext_b}). Supported: {pretty}.",
             )
         save_path_b = os.path.join(settings.UPLOAD_DIR, f"cmp_b_{current_user.id}_{clean_name}")
         try:
@@ -158,9 +157,14 @@ async def compare_documents_endpoint(
         )
 
     if not text_a.strip() or not text_b.strip():
+        missing = []
+        if not text_a.strip():
+            missing.append("Document A")
+        if not text_b.strip():
+            missing.append("Document B")
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="One or both documents appear to be empty or could not be parsed.",
+            detail=f"{' and '.join(missing)} appear to be empty or could not be parsed. Please verify the file format and contents.",
         )
 
     result = compare_legal_documents(name_a, text_a, name_b, text_b)

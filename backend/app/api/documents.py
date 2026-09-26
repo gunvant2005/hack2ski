@@ -9,6 +9,7 @@ from app.models.all_models import User, Document, DocumentChunk, AnalysisResult
 from app.schemas.schemas import DocumentOut, AnalysisResultOut
 from app.api.auth import get_current_user
 from app.core.config import settings
+from app.core.security import sanitize_filename
 from app.services.document_processor import extract_text_from_file, chunk_document_pages
 from app.services.ai_service import analyze_document_content
 from app.services.rag_service import compute_simple_embedding
@@ -60,20 +61,20 @@ async def upload_document(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    # --- Filename sanitisation & path-traversal prevention ---
     raw_filename = file.filename or "uploaded_document.pdf"
-    clean_filename = os.path.basename(raw_filename).replace("\0", "").strip()
-    if not clean_filename:
-        clean_filename = "document.pdf"
+    clean_filename = sanitize_filename(raw_filename)
+    if not clean_filename or "." not in clean_filename:
+        clean_filename = clean_filename + ".pdf" if clean_filename else "document.pdf"
 
     ext = os.path.splitext(clean_filename)[1].lower()
-    if ext not in {".pdf", ".docx", ".doc", ".txt"}:
+    allowed_exts = {e.lower() for e in settings.ALLOWED_UPLOAD_EXTENSIONS}
+    if ext not in allowed_exts:
+        pretty = ", ".join(sorted(allowed_exts))
         raise HTTPException(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            detail="Invalid file type. Only PDF, DOCX, and TXT files are supported.",
+            detail=f"Invalid file type ({ext}). Supported formats: {pretty}.",
         )
 
-    # --- Read & size-check before persisting ---
     contents = await file.read()
     max_bytes = settings.MAX_UPLOAD_SIZE_MB * 1024 * 1024
     if len(contents) > max_bytes:
@@ -82,7 +83,6 @@ async def upload_document(
             detail=f"File exceeds the maximum upload limit of {settings.MAX_UPLOAD_SIZE_MB} MB.",
         )
 
-    # --- Save to isolated user upload directory ---
     try:
         os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
     except Exception:
@@ -95,9 +95,16 @@ async def upload_document(
         logger.error(f"Failed to write upload file: {e}")
         raise HTTPException(status_code=500, detail="Failed to save uploaded file.")
 
-    doc_type = "PDF" if ext == ".pdf" else ("DOCX" if ext in {".docx", ".doc"} else "TXT")
+    ext_map = {
+        ".pdf": "PDF",
+        ".docx": "DOCX",
+        ".doc": "DOC",
+        ".txt": "TXT",
+        ".rtf": "RTF",
+        ".md": "MARKDOWN",
+    }
+    doc_type = ext_map.get(ext, "DOCUMENT")
 
-    # --- Create DB record ---
     new_doc = Document(
         user_id=current_user.id,
         filename=clean_filename,
@@ -109,14 +116,22 @@ async def upload_document(
     db.commit()
     db.refresh(new_doc)
 
-    # --- Process & analyse ---
     analysis_res = None
     try:
         pages_data = extract_text_from_file(save_path)
         chunks = chunk_document_pages(pages_data)
         full_text = "\n\n".join(c["text"] for c in chunks)
 
-        # Bulk-insert chunks
+        if not full_text.strip():
+            new_doc.status = "Error"
+            db.commit()
+            logger.warning(f"Document {new_doc.id} had no extractable text.")
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Could not extract any readable text from the uploaded file. "
+                       "Please ensure it is a valid, non-scanned PDF/DOCX/TXT/RTF document.",
+            )
+
         db_chunks = []
         for c in chunks:
             emb = compute_simple_embedding(c["text"])
@@ -131,7 +146,6 @@ async def upload_document(
             )
         db.add_all(db_chunks)
 
-        # Run AI analysis
         analysis_data = analyze_document_content(clean_filename, full_text, chunks)
         analysis_res = AnalysisResult(
             document_id=new_doc.id,
@@ -147,6 +161,8 @@ async def upload_document(
         new_doc.status = "Analyzed"
         db.commit()
         logger.info(f"Document {new_doc.id} ({clean_filename}) analysed successfully.")
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Analysis failed for document {new_doc.id}: {e}", exc_info=True)
         new_doc.status = "Error"

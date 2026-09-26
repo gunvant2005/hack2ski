@@ -616,83 +616,110 @@ It does not replace professional legal advice from a qualified attorney.
               onClick={handleExportMarkdown}
               className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold flex items-center gap-1 transition-all shadow-subtle active:scale-[0.97]"
               title="Download structured Markdown report (.md)"
+              aria-label="Export analysis report as Markdown file"
             >
-              <Download className="w-3.5 h-3.5 text-slate-700" />
+              <Download className="w-3.5 h-3.5 text-slate-700" aria-hidden="true" />
               <span className="hidden sm:inline">Export (.md)</span>
             </button>
             <button
               onClick={handleExportReport}
               className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold flex items-center gap-1 transition-all shadow-subtle active:scale-[0.97]"
               title="Download text report (.txt)"
+              aria-label="Export analysis report as plain text file"
             >
-              <FileText className="w-3.5 h-3.5 text-slate-700" />
+              <FileText className="w-3.5 h-3.5 text-slate-700" aria-hidden="true" />
               <span className="hidden sm:inline">Export (.txt)</span>
             </button>
             <button
               onClick={() => window.print()}
               className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold flex items-center gap-1 transition-all shadow-subtle active:scale-[0.97]"
               title="Print or Save as PDF"
+              aria-label="Print or save analysis report as PDF"
             >
-              <Copy className="w-3.5 h-3.5 text-slate-700" />
+              <Copy className="w-3.5 h-3.5 text-slate-700" aria-hidden="true" />
               <span className="hidden sm:inline">Print / PDF</span>
             </button>
           </div>
         </div>
 
         {/* Minimalist Tab Selector Bar */}
-        <div className="flex items-center gap-1 bg-slate-100/90 p-1 rounded-xl border border-slate-200/80 overflow-x-auto max-w-full">
+        <div role="tablist" aria-label="Document analysis views" className="flex items-center gap-1 bg-slate-100/90 p-1 rounded-xl border border-slate-200/80 overflow-x-auto max-w-full">
           <button
+            role="tab"
+            aria-selected={activeTab === 'summary'}
+            aria-controls="tab-summary"
+            id="tab-summary-btn"
             onClick={() => setActiveTab('summary')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
               activeTab === 'summary' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <BookOpen className="w-3.5 h-3.5" />
+            <BookOpen className="w-3.5 h-3.5" aria-hidden="true" />
             Summary
           </button>
           <button
+            role="tab"
+            aria-selected={activeTab === 'clauses'}
+            aria-controls="tab-clauses"
+            id="tab-clauses-btn"
             onClick={() => setActiveTab('clauses')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
               activeTab === 'clauses' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <FileText className="w-3.5 h-3.5" />
+            <FileText className="w-3.5 h-3.5" aria-hidden="true" />
             Clauses ({clausesData.length})
           </button>
           <button
+            role="tab"
+            aria-selected={activeTab === 'risks'}
+            aria-controls="tab-risks"
+            id="tab-risks-btn"
             onClick={() => setActiveTab('risks')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
               activeTab === 'risks' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+            <AlertTriangle className="w-3.5 h-3.5 text-amber-400" aria-hidden="true" />
             Attention Radar ({risksData?.risks?.length || 0})
           </button>
           <button
+            role="tab"
+            aria-selected={activeTab === 'chat'}
+            aria-controls="tab-chat"
+            id="tab-chat-btn"
             onClick={() => setActiveTab('chat')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
               activeTab === 'chat' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <MessageSquare className="w-3.5 h-3.5" />
+            <MessageSquare className="w-3.5 h-3.5" aria-hidden="true" />
             Ask AI
           </button>
           <button
+            role="tab"
+            aria-selected={activeTab === 'checklist'}
+            aria-controls="tab-checklist"
+            id="tab-checklist-btn"
             onClick={() => setActiveTab('checklist')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
               activeTab === 'checklist' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <CheckSquare className="w-3.5 h-3.5" />
+            <CheckSquare className="w-3.5 h-3.5" aria-hidden="true" />
             Checklist
           </button>
           <button
+            role="tab"
+            aria-selected={activeTab === 'lawyer'}
+            aria-controls="tab-lawyer"
+            id="tab-lawyer-btn"
             onClick={() => setActiveTab('lawyer')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
               activeTab === 'lawyer' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <HelpCircle className="w-3.5 h-3.5" />
+            <HelpCircle className="w-3.5 h-3.5" aria-hidden="true" />
             Lawyer Questions
           </button>
         </div>
@@ -711,17 +738,21 @@ It does not replace professional legal advice from a qualified attorney.
           </div>
 
           <div className="p-3 bg-white border-b border-slate-100 flex items-center gap-2">
-            <Search className="w-3.5 h-3.5 text-slate-400" />
+            <label htmlFor="viewer-search" className="sr-only">Search within document</label>
+            <Search className="w-3.5 h-3.5 text-slate-400" aria-hidden="true" />
             <input
+              id="viewer-search"
               type="text"
               placeholder="Search in uploaded document..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              aria-describedby="viewer-search-hint"
               className="w-full bg-slate-50 border border-slate-200/80 rounded-lg px-3 py-1 text-xs text-slate-800 focus:outline-none focus:border-slate-400"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
+                aria-label="Clear document search"
                 className="text-[11px] text-slate-400 hover:text-slate-700 px-1"
               >
                 Clear
@@ -792,6 +823,7 @@ It does not replace professional legal advice from a qualified attorney.
               <button
                 onClick={() => setSelectedPage((p) => Math.max(1, p - 1))}
                 disabled={selectedPage <= 1}
+                aria-label="Go to previous page in document viewer"
                 className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed text-slate-800 font-medium transition-all"
               >
                 Previous Page
@@ -799,6 +831,7 @@ It does not replace professional legal advice from a qualified attorney.
               <button
                 onClick={() => setSelectedPage((p) => Math.min(totalPages, p + 1))}
                 disabled={selectedPage >= totalPages}
+                aria-label="Go to next page in document viewer"
                 className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed text-slate-800 font-medium transition-all"
               >
                 Next Page
@@ -814,13 +847,14 @@ It does not replace professional legal advice from a qualified attorney.
         <div className="lg:col-span-7 space-y-6">
           {/* TAB 1: SUMMARY */}
           {activeTab === 'summary' && (
-            summaryData ? (
-              <div className="space-y-6">
-                <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-minimal space-y-4">
-                  <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
-                    <Sparkles className="w-4 h-4 text-slate-800" />
-                    <span>Plain-Language Summary</span>
-                  </div>
+            <div id="tab-summary" role="tabpanel" aria-labelledby="tab-summary-btn" tabIndex={0} className="space-y-6">
+              {summaryData ? (
+                <div className="space-y-6">
+                  <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-minimal space-y-4">
+                    <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
+                      <Sparkles className="w-4 h-4 text-slate-800" aria-hidden="true" />
+                      <span>Plain-Language Summary</span>
+                    </div>
                   <p className="text-slate-800 text-sm leading-relaxed font-normal bg-slate-50/80 p-4 rounded-xl border border-slate-200/80">
                     {summaryData.plain_language_summary}
                   </p>
@@ -880,7 +914,7 @@ It does not replace professional legal advice from a qualified attorney.
 
           {/* TAB 2: KEY CLAUSES */}
           {activeTab === 'clauses' && (
-            <div className="space-y-4">
+            <div id="tab-clauses" role="tabpanel" aria-labelledby="tab-clauses-btn" tabIndex={0} className="space-y-4">
               <div className="flex items-center justify-between bg-white p-4 border border-slate-200/80 rounded-2xl shadow-minimal">
                 <h3 className="font-bold text-sm text-slate-900">Extracted Key Clauses ({clausesData.length})</h3>
                 <span className="text-xs text-slate-500">Categorized by functional topic</span>
@@ -944,7 +978,7 @@ It does not replace professional legal advice from a qualified attorney.
 
           {/* TAB 3: ATTENTION DASHBOARD / RISK */}
           {activeTab === 'risks' && (
-            <div className="space-y-6">
+            <div id="tab-risks" role="tabpanel" aria-labelledby="tab-risks-btn" tabIndex={0} className="space-y-6">
               {/* Radar Overview Banner */}
               <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-minimal space-y-4">
                 <div className="flex items-center justify-between">
@@ -1028,7 +1062,7 @@ It does not replace professional legal advice from a qualified attorney.
 
           {/* TAB 4: ASK AI CHAT */}
           {activeTab === 'chat' && (
-            <div className="bg-white border border-slate-200/80 rounded-2xl shadow-minimal flex flex-col h-[calc(100vh-240px)]">
+            <div id="tab-chat" role="tabpanel" aria-labelledby="tab-chat-btn" tabIndex={0} className="bg-white border border-slate-200/80 rounded-2xl shadow-minimal flex flex-col h-[calc(100vh-240px)]">
               <div className="p-4 bg-slate-50 border-b border-slate-200/80 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <MessageSquare className="w-4 h-4 text-slate-800" />
@@ -1089,8 +1123,9 @@ It does not replace professional legal advice from a qualified attorney.
                             }}
                             className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded transition-colors self-start shrink-0"
                             title="Copy answer"
+                            aria-label="Copy AI answer to clipboard"
                           >
-                            <Copy className="w-3 h-3" />
+                            <Copy className="w-3 h-3" aria-hidden="true" />
                           </button>
                         )}
                       </div>
@@ -1155,7 +1190,7 @@ It does not replace professional legal advice from a qualified attorney.
 
           {/* TAB 5: ACTION CHECKLIST */}
           {activeTab === 'checklist' && (
-            <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-minimal space-y-6">
+            <div id="tab-checklist" role="tabpanel" aria-labelledby="tab-checklist-btn" tabIndex={0} className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-minimal space-y-6">
               <div className="flex items-center justify-between border-b border-slate-100 pb-4">
                 <div>
                   <h3 className="font-bold text-slate-900 text-base">Before Signing Checklist</h3>
@@ -1173,18 +1208,24 @@ It does not replace professional legal advice from a qualified attorney.
                 {checklistData.map((item: any) => (
                   <div
                     key={item.id}
-                    onClick={() => toggleChecklistItem(item.id)}
                     className={`p-4 rounded-xl border cursor-pointer transition-all flex items-start gap-3.5 ${
                       item.completed ? 'bg-slate-50 border-slate-200/80 opacity-70' : 'bg-white border-slate-200 hover:border-slate-400 shadow-subtle'
                     }`}
                   >
+                    <label htmlFor={`checklist-${item.id}`} className="sr-only">{item.task}</label>
                     <input
+                      id={`checklist-${item.id}`}
                       type="checkbox"
                       checked={item.completed}
                       onChange={() => toggleChecklistItem(item.id)}
+                      onClick={(e) => e.stopPropagation()}
                       className="mt-0.5 w-4 h-4 rounded text-slate-900 focus:ring-slate-900 cursor-pointer"
                     />
-                    <div className="flex-1">
+                    <div
+                      className="flex-1 cursor-pointer"
+                      onClick={() => toggleChecklistItem(item.id)}
+                      role="presentation"
+                    >
                       <span className={`text-xs font-semibold block ${item.completed ? 'line-through text-slate-400' : 'text-slate-900'}`}>
                         {item.task}
                       </span>
@@ -1198,7 +1239,7 @@ It does not replace professional legal advice from a qualified attorney.
 
           {/* TAB 6: LAWYER QUESTIONS */}
           {activeTab === 'lawyer' && (
-            <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-minimal space-y-6">
+            <div id="tab-lawyer" role="tabpanel" aria-labelledby="tab-lawyer-btn" tabIndex={0} className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-minimal space-y-6">
               <div className="flex items-center justify-between border-b border-slate-100 pb-4">
                 <div>
                   <h3 className="font-bold text-slate-900 text-base">Questions to Discuss With a Legal Professional</h3>
@@ -1208,8 +1249,9 @@ It does not replace professional legal advice from a qualified attorney.
                 <button
                   onClick={handleCopyQuestions}
                   className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs flex items-center gap-1.5 shadow-sm transition-all active:scale-[0.97]"
+                  aria-label={copied ? "Lawyer questions copied to clipboard" : "Copy lawyer questions to clipboard"}
                 >
-                  <Copy className="w-3.5 h-3.5" />
+                  <Copy className="w-3.5 h-3.5" aria-hidden="true" />
                   <span>{copied ? 'Copied to Clipboard!' : 'Copy Questions'}</span>
                 </button>
               </div>

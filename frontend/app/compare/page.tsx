@@ -17,7 +17,7 @@ export default function ComparePage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ComparisonResult | null>(null);
   const [error, setError] = useState('');
-  const [changeFilter, setChangeFilter] = useState<'All' | 'Added' | 'Modified' | 'Removed'>('All');
+  const [changeFilter, setChangeFilter] = useState<'All' | 'Added' | 'Modified' | 'Removed' | 'Inconsistent'>('All');
   const [copiedReport, setCopiedReport] = useState(false);
 
   useEffect(() => {
@@ -214,27 +214,33 @@ Clause 7. Dispute Resolution: State of New York.`;
             </h3>
 
             {documents.length > 0 && (
-              <select
-                value={docAId}
-                onChange={(e) => {
-                  setDocAId(e.target.value);
-                  setFileA(null);
-                }}
-                className="w-full p-2.5 bg-white border border-slate-200/80 rounded-xl text-xs text-slate-800 font-semibold focus:outline-none focus:border-slate-400"
-              >
-                <option value="">-- Choose Existing Document A --</option>
-                {documents.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.filename}
-                  </option>
-                ))}
-              </select>
+              <>
+                <label htmlFor="compare-select-a" className="sr-only">Select existing Document A</label>
+                <select
+                  id="compare-select-a"
+                  value={docAId}
+                  onChange={(e) => {
+                    setDocAId(e.target.value);
+                    setFileA(null);
+                  }}
+                  className="w-full p-2.5 bg-white border border-slate-200/80 rounded-xl text-xs text-slate-800 font-semibold focus:outline-none focus:border-slate-400"
+                >
+                  <option value="">-- Choose Existing Document A --</option>
+                  {documents.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.filename}
+                    </option>
+                  ))}
+                </select>
+              </>
             )}
 
             <div className="relative border-2 border-dashed border-slate-200 rounded-xl p-4 text-center bg-white hover:border-slate-400 transition-minimal">
+              <label htmlFor="compare-upload-a" className="sr-only">Upload Document A file</label>
               <input
+                id="compare-upload-a"
                 type="file"
-                accept=".pdf,.docx,.doc,.txt"
+                accept=".pdf,.docx,.doc,.txt,.rtf"
                 onChange={(e) => {
                   if (e.target.files && e.target.files[0]) {
                     setFileA(e.target.files[0]);
@@ -243,9 +249,9 @@ Clause 7. Dispute Resolution: State of New York.`;
                 }}
                 className="absolute inset-0 opacity-0 cursor-pointer"
               />
-              <UploadCloud className="w-6 h-6 text-slate-400 mx-auto mb-1" />
+              <UploadCloud className="w-6 h-6 text-slate-400 mx-auto mb-1" aria-hidden="true" />
               <span className="text-xs font-semibold text-slate-700 block">
-                {fileA ? fileA.name : 'Or Upload File A (PDF, DOCX, TXT)'}
+                {fileA ? fileA.name : 'Or Upload File A (PDF, DOCX, DOC, TXT, RTF)'}
               </span>
             </div>
           </div>
@@ -258,27 +264,33 @@ Clause 7. Dispute Resolution: State of New York.`;
             </h3>
 
             {documents.length > 0 && (
-              <select
-                value={docBId}
-                onChange={(e) => {
-                  setDocBId(e.target.value);
-                  setFileB(null);
-                }}
-                className="w-full p-2.5 bg-white border border-slate-200/80 rounded-xl text-xs text-slate-800 font-semibold focus:outline-none focus:border-slate-400"
-              >
-                <option value="">-- Choose Existing Document B --</option>
-                {documents.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.filename}
-                  </option>
-                ))}
-              </select>
+              <>
+                <label htmlFor="compare-select-b" className="sr-only">Select existing Document B</label>
+                <select
+                  id="compare-select-b"
+                  value={docBId}
+                  onChange={(e) => {
+                    setDocBId(e.target.value);
+                    setFileB(null);
+                  }}
+                  className="w-full p-2.5 bg-white border border-slate-200/80 rounded-xl text-xs text-slate-800 font-semibold focus:outline-none focus:border-slate-400"
+                >
+                  <option value="">-- Choose Existing Document B --</option>
+                  {documents.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.filename}
+                    </option>
+                  ))}
+                </select>
+              </>
             )}
 
             <div className="relative border-2 border-dashed border-slate-200 rounded-xl p-4 text-center bg-white hover:border-slate-400 transition-minimal">
+              <label htmlFor="compare-upload-b" className="sr-only">Upload Document B file</label>
               <input
+                id="compare-upload-b"
                 type="file"
-                accept=".pdf,.docx,.doc,.txt"
+                accept=".pdf,.docx,.doc,.txt,.rtf"
                 onChange={(e) => {
                   if (e.target.files && e.target.files[0]) {
                     setFileB(e.target.files[0]);
@@ -287,9 +299,9 @@ Clause 7. Dispute Resolution: State of New York.`;
                 }}
                 className="absolute inset-0 opacity-0 cursor-pointer"
               />
-              <UploadCloud className="w-6 h-6 text-slate-400 mx-auto mb-1" />
+              <UploadCloud className="w-6 h-6 text-slate-400 mx-auto mb-1" aria-hidden="true" />
               <span className="text-xs font-semibold text-slate-700 block">
-                {fileB ? fileB.name : 'Or Upload File B (PDF, DOCX, TXT)'}
+                {fileB ? fileB.name : 'Or Upload File B (PDF, DOCX, DOC, TXT, RTF)'}
               </span>
             </div>
           </div>
@@ -314,8 +326,8 @@ Clause 7. Dispute Resolution: State of New York.`;
         </button>
 
         {error && (
-          <div className="bg-rose-50 border border-rose-200/80 text-rose-800 p-3 rounded-xl text-xs flex items-center gap-2 mt-3">
-            <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+          <div role="alert" aria-live="assertive" className="bg-rose-50 border border-rose-200/80 text-rose-800 p-3 rounded-xl text-xs flex items-center gap-2 mt-3">
+            <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" aria-hidden="true" />
             <span>{error}</span>
           </div>
         )}
@@ -338,8 +350,9 @@ Clause 7. Dispute Resolution: State of New York.`;
                 onClick={handleCopyReport}
                 className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold flex items-center gap-1.5 transition-colors"
                 title="Copy comparison summary to clipboard"
+                aria-label={copiedReport ? "Comparison summary copied to clipboard" : "Copy comparison summary to clipboard"}
               >
-                {copiedReport ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                {copiedReport ? <Check className="w-3.5 h-3.5 text-emerald-600" aria-hidden="true" /> : <Copy className="w-3.5 h-3.5" aria-hidden="true" />}
                 <span>{copiedReport ? 'Copied!' : 'Copy Summary'}</span>
               </button>
 
@@ -347,18 +360,20 @@ Clause 7. Dispute Resolution: State of New York.`;
                 onClick={handleDownloadReport}
                 className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-sm"
                 title="Download report as Markdown file"
+                aria-label="Download comparison report as Markdown"
               >
-                <Download className="w-3.5 h-3.5" />
+                <Download className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>Download Report</span>
               </button>
             </div>
           </div>
 
           {/* Change Summary Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <button
               type="button"
               onClick={() => setChangeFilter('All')}
+              aria-pressed={changeFilter === 'All'}
               className={`minimal-card rounded-xl p-4 shadow-subtle text-center transition-all ${
                 changeFilter === 'All' ? 'ring-2 ring-slate-900 bg-slate-50/80' : 'bg-white'
               }`}
@@ -370,6 +385,7 @@ Clause 7. Dispute Resolution: State of New York.`;
             <button
               type="button"
               onClick={() => setChangeFilter('Added')}
+              aria-pressed={changeFilter === 'Added'}
               className={`minimal-card rounded-xl p-4 shadow-subtle text-center transition-all ${
                 changeFilter === 'Added' ? 'ring-2 ring-emerald-600 bg-emerald-50/50' : 'bg-white'
               }`}
@@ -381,6 +397,7 @@ Clause 7. Dispute Resolution: State of New York.`;
             <button
               type="button"
               onClick={() => setChangeFilter('Modified')}
+              aria-pressed={changeFilter === 'Modified'}
               className={`minimal-card rounded-xl p-4 shadow-subtle text-center transition-all ${
                 changeFilter === 'Modified' ? 'ring-2 ring-amber-600 bg-amber-50/50' : 'bg-white'
               }`}
@@ -392,6 +409,7 @@ Clause 7. Dispute Resolution: State of New York.`;
             <button
               type="button"
               onClick={() => setChangeFilter('Removed')}
+              aria-pressed={changeFilter === 'Removed'}
               className={`minimal-card rounded-xl p-4 shadow-subtle text-center transition-all ${
                 changeFilter === 'Removed' ? 'ring-2 ring-rose-600 bg-rose-50/50' : 'bg-white'
               }`}
@@ -399,22 +417,35 @@ Clause 7. Dispute Resolution: State of New York.`;
               <span className="text-xs font-bold text-rose-800 uppercase tracking-wider">Removed Clauses</span>
               <h4 className="text-2xl font-extrabold text-rose-700 mt-1">{(result as any).removed_count || 0}</h4>
             </button>
+
+            <button
+              type="button"
+              onClick={() => setChangeFilter('Inconsistent')}
+              aria-pressed={changeFilter === 'Inconsistent'}
+              className={`minimal-card rounded-xl p-4 shadow-subtle text-center transition-all ${
+                changeFilter === 'Inconsistent' ? 'ring-2 ring-violet-600 bg-violet-50/50' : 'bg-white'
+              }`}
+            >
+              <span className="text-xs font-bold text-violet-800 uppercase tracking-wider">Inconsistencies</span>
+              <h4 className="text-2xl font-extrabold text-violet-700 mt-1">{(result as any).inconsistent_count || 0}</h4>
+            </button>
           </div>
 
           {/* Filter Pills Bar */}
-          <div className="flex items-center gap-2 overflow-x-auto text-xs py-1">
+          <div role="group" aria-label="Comparison change status filter" className="flex items-center gap-2 overflow-x-auto text-xs py-1">
             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">Filter View:</span>
-            {(['All', 'Added', 'Modified', 'Removed'] as const).map((filter) => (
+            {(['All', 'Added', 'Modified', 'Removed', 'Inconsistent'] as const).map((filter) => (
               <button
                 key={filter}
                 onClick={() => setChangeFilter(filter)}
-                className={`px-3 py-1 rounded-lg font-semibold transition-all ${
+                aria-pressed={changeFilter === filter}
+                className={`px-3 py-1 rounded-lg font-semibold transition-all whitespace-nowrap ${
                   changeFilter === filter
                     ? 'bg-slate-900 text-white shadow-sm'
                     : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
                 }`}
               >
-                {filter} Clauses
+                {filter === 'Inconsistent' ? 'Inconsistencies' : `${filter} Clauses`}
               </button>
             ))}
           </div>
@@ -436,15 +467,19 @@ Clause 7. Dispute Resolution: State of New York.`;
                     <div className="flex items-center gap-2">
                       {change.status === 'Added' ? (
                         <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/80 text-xs font-bold flex items-center gap-1">
-                          <Plus className="w-3 h-3 text-emerald-600" /> Added
+                          <Plus className="w-3 h-3 text-emerald-600" aria-hidden="true" /> Added
                         </span>
                       ) : change.status === 'Removed' ? (
                         <span className="px-2.5 py-1 rounded-full bg-rose-50 text-rose-800 border border-rose-200/80 text-xs font-bold flex items-center gap-1">
-                          <Minus className="w-3 h-3 text-rose-600" /> Removed
+                          <Minus className="w-3 h-3 text-rose-600" aria-hidden="true" /> Removed
+                        </span>
+                      ) : change.status === 'Inconsistent' ? (
+                        <span className="px-2.5 py-1 rounded-full bg-violet-50 text-violet-800 border border-violet-200/80 text-xs font-bold flex items-center gap-1">
+                          <AlertTriangle className="w-3 h-3 text-violet-600" aria-hidden="true" /> Inconsistency Detected
                         </span>
                       ) : (
                         <span className="px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200/80 text-xs font-bold flex items-center gap-1">
-                          <Edit3 className="w-3 h-3 text-amber-600" /> Modified
+                          <Edit3 className="w-3 h-3 text-amber-600" aria-hidden="true" /> Modified
                         </span>
                       )}
 
