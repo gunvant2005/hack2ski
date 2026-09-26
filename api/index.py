@@ -1,5 +1,6 @@
 import sys
 import os
+import traceback
 
 # Resolve file and directory paths
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -20,8 +21,27 @@ try:
 except ImportError:
     pass
 
-import app.main
+try:
+    import app.main
+    app = app.main.app
+except Exception as e:
+    err_tb = traceback.format_exc()
+    from fastapi import FastAPI
+    from fastapi.responses import JSONResponse
 
-app = app.main.app
+    app = FastAPI(title="LegalLens AI - Deployment Diagnostic")
+
+    @app.api_route("/{full_path:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"])
+    async def startup_diagnostic(full_path: str):
+        return JSONResponse(
+            status_code=500,
+            content={
+                "status": "initialization_failed",
+                "error": str(e),
+                "path": full_path,
+                "traceback": err_tb.splitlines()[-15:],
+            },
+        )
+
 handler = app
 application = app
