@@ -53,8 +53,8 @@ export default function DashboardPage() {
     if (!file) return;
 
     const ext = file.name.split('.').pop()?.toLowerCase();
-    if (ext !== 'pdf' && ext !== 'docx' && ext !== 'doc') {
-      setErrorMsg('Unsupported file format. Please upload a PDF or DOCX file.');
+    if (ext !== 'pdf' && ext !== 'docx' && ext !== 'doc' && ext !== 'txt') {
+      setErrorMsg('Unsupported file format. Please upload a PDF, DOCX, or TXT file.');
       return;
     }
 
@@ -180,13 +180,13 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            <div className="inline-block">
-              <label className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs cursor-pointer shadow-sm transition-all inline-flex items-center gap-2">
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <label className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs cursor-pointer shadow-sm transition-all inline-flex items-center gap-2 active:scale-[0.98]">
                 <FileText className="w-4 h-4 text-white" />
                 <span>Choose File</span>
                 <input
                   type="file"
-                  accept=".pdf,.docx,.doc"
+                  accept=".pdf,.docx,.doc,.txt"
                   className="hidden"
                   onChange={(e) => {
                     if (e.target.files && e.target.files[0]) {
@@ -195,10 +195,49 @@ export default function DashboardPage() {
                   }}
                 />
               </label>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const sampleText = `CONSULTING SERVICES AGREEMENT
+This Consulting Agreement is entered into by and between Apex Global Solutions LLC ("Client") and Quantum Legal Advisors Inc. ("Consultant").
+
+SECTION 1. SCOPE OF SERVICES
+Consultant shall provide specialized technical, business management, and regulatory compliance consulting services as mutually agreed upon in writing.
+
+SECTION 2. COMPENSATION AND PAYMENT TERMS
+Client shall pay Consultant a monthly retainer fee of $7,500 USD, payable within 15 days of invoice date. Late payments shall accrue interest at 1.5% per month.
+
+SECTION 3. TERM AND AUTOMATIC RENEWAL
+The initial term shall be one (1) year. This Agreement shall automatically renew for additional one-year periods unless either party delivers written notice of non-renewal at least 60 days prior to the expiration of the current term.
+
+SECTION 4. TERMINATION
+Either party may terminate this Agreement without cause upon ninety (90) days prior written notice. Either party may terminate immediately for material breach if not cured within thirty (30) days of notice.
+
+SECTION 5. CONFIDENTIALITY AND NON-DISCLOSURE
+Consultant and Client agree to protect all proprietary, financial, and confidential information from unauthorized disclosure for a period of five (5) years following termination.
+
+SECTION 6. INDEMNIFICATION AND LIABILITY
+Consultant agrees to indemnify, defend, and hold harmless Client against any third-party claims arising from Consultant's gross negligence. Total aggregate liability under this Agreement shall not exceed the total fees paid by Client in the preceding six (6) months.
+
+SECTION 7. POST-TERMINATION NON-COMPETE
+For a period of twelve (12) months following termination of this Agreement, Consultant shall not directly or indirectly provide identical consulting services to any direct competitor of Client within a 50-mile radius.
+
+SECTION 8. GOVERNING LAW AND ARBITRATION
+This Agreement shall be governed by the laws of the State of Delaware. Any dispute arising out of this Agreement shall be resolved through binding arbitration before the American Arbitration Association.`;
+
+                  const sampleFile = new File([sampleText], "Consulting_Services_Agreement.txt", { type: "text/plain" });
+                  handleFileUpload(sampleFile);
+                }}
+                className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs transition-all inline-flex items-center gap-1.5 active:scale-[0.98]"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-slate-700" />
+                <span>Try Sample Agreement</span>
+              </button>
             </div>
 
             <p className="text-[11px] text-slate-400 font-medium">
-              Supported Formats: PDF or DOCX &bull; Maximum File Size: 20 MB
+              Supported Formats: PDF, DOCX, or TXT &bull; Maximum File Size: 20 MB
             </p>
 
             {errorMsg && (

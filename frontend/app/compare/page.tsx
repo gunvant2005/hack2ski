@@ -105,7 +105,7 @@ export default function ComparePage() {
             <div className="relative border-2 border-dashed border-slate-200 rounded-xl p-4 text-center bg-white hover:border-slate-400 transition-minimal">
               <input
                 type="file"
-                accept=".pdf,.docx,.doc"
+                accept=".pdf,.docx,.doc,.txt"
                 onChange={(e) => {
                   if (e.target.files && e.target.files[0]) {
                     setFileA(e.target.files[0]);
@@ -116,7 +116,7 @@ export default function ComparePage() {
               />
               <UploadCloud className="w-6 h-6 text-slate-400 mx-auto mb-1" />
               <span className="text-xs font-semibold text-slate-700 block">
-                {fileA ? fileA.name : 'Or Upload File A (PDF/DOCX)'}
+                {fileA ? fileA.name : 'Or Upload File A (PDF, DOCX, TXT)'}
               </span>
             </div>
           </div>
@@ -149,7 +149,7 @@ export default function ComparePage() {
             <div className="relative border-2 border-dashed border-slate-200 rounded-xl p-4 text-center bg-white hover:border-slate-400 transition-minimal">
               <input
                 type="file"
-                accept=".pdf,.docx,.doc"
+                accept=".pdf,.docx,.doc,.txt"
                 onChange={(e) => {
                   if (e.target.files && e.target.files[0]) {
                     setFileB(e.target.files[0]);
@@ -160,7 +160,7 @@ export default function ComparePage() {
               />
               <UploadCloud className="w-6 h-6 text-slate-400 mx-auto mb-1" />
               <span className="text-xs font-semibold text-slate-700 block">
-                {fileB ? fileB.name : 'Or Upload File B (PDF/DOCX)'}
+                {fileB ? fileB.name : 'Or Upload File B (PDF, DOCX, TXT)'}
               </span>
             </div>
           </div>

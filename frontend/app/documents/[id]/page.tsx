@@ -41,6 +41,8 @@ export default function DocumentAnalysisPage() {
   const [activeTab, setActiveTab] = useState<'summary' | 'clauses' | 'risks' | 'chat' | 'checklist' | 'lawyer'>('summary');
   const [loading, setLoading] = useState(true);
 
+  const [error, setError] = useState<string | null>(null);
+
   // Tab Data States
   const [summaryData, setSummaryData] = useState<any>(null);
   const [clausesData, setClausesData] = useState<any[]>([]);
@@ -81,6 +83,7 @@ export default function DocumentAnalysisPage() {
   const loadDocumentAnalysis = async () => {
     try {
       setLoading(true);
+      setError(null);
       const meta = await getDocument(documentId);
       setDocumentMeta(meta);
 
@@ -98,8 +101,9 @@ export default function DocumentAnalysisPage() {
       setRisksData({ risk_level: analysis.risk_level, risks: analysis.risks || [] });
       setChecklistData(analysis.checklist || []);
       setLawyerQuestionsData(analysis.lawyer_questions || []);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Analysis load error:', err);
+      setError(err.response?.data?.detail || 'Failed to complete document analysis. Please click Retry.');
     } finally {
       setLoading(false);
     }
@@ -177,6 +181,32 @@ export default function DocumentAnalysisPage() {
         <Loader2 className="w-9 h-9 animate-spin text-slate-800" aria-hidden="true" />
         <h2 className="text-lg font-bold">Analyzing Document with GenAI Engine...</h2>
         <p className="text-xs text-slate-500">Extracting text, chunking clauses, and generating risk insights.</p>
+      </div>
+    );
+  }
+
+  if (error && !summaryData) {
+    return (
+      <div className="min-h-screen bg-[#FAFBFD] text-slate-900 flex flex-col items-center justify-center p-6 space-y-4 text-center">
+        <div className="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 flex items-center justify-center mx-auto shadow-sm">
+          <AlertTriangle className="w-6 h-6" />
+        </div>
+        <h2 className="text-xl font-extrabold text-slate-900">Analysis Encountered an Issue</h2>
+        <p className="text-xs text-slate-500 max-w-md">{error}</p>
+        <div className="flex items-center gap-3 pt-2">
+          <button
+            onClick={loadDocumentAnalysis}
+            className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold shadow-sm transition-all active:scale-[0.98]"
+          >
+            Retry Analysis
+          </button>
+          <button
+            onClick={() => router.push('/dashboard')}
+            className="px-4 py-2.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl text-xs font-semibold transition-all active:scale-[0.98]"
+          >
+            Back to Dashboard
+          </button>
+        </div>
       </div>
     );
   }

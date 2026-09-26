@@ -127,60 +127,72 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Card 1: Understand */}
-            <div className="minimal-card rounded-2xl p-6 transition-minimal hover:shadow-minimal">
-              <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-900 flex items-center justify-center mb-5 font-bold">
-                <FileText className="w-5 h-5 text-slate-800" />
+            <Link
+              href="/register"
+              className="minimal-card rounded-2xl p-6 transition-minimal hover:shadow-minimal group block text-left active:scale-[0.99]"
+            >
+              <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-900 flex items-center justify-center mb-5 font-bold group-hover:bg-slate-900 group-hover:text-white transition-colors">
+                <FileText className="w-5 h-5 text-slate-800 group-hover:text-white" />
               </div>
               <h3 className="text-lg font-bold text-slate-900 mb-2">Understand</h3>
               <p className="text-slate-600 text-xs leading-relaxed mb-4">
                 Turn complex legal language into plain English summaries. Extract key responsibilities, payment terms, and duration.
               </p>
-              <span className="text-xs text-slate-900 font-bold flex items-center gap-1">
+              <span className="text-xs text-slate-900 font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
                 Plain-Language Summaries →
               </span>
-            </div>
+            </Link>
 
             {/* Card 2: Detect */}
-            <div className="minimal-card rounded-2xl p-6 transition-minimal hover:shadow-minimal">
-              <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-800 border border-amber-200/60 flex items-center justify-center mb-5 font-bold">
-                <AlertTriangle className="w-5 h-5 text-amber-700" />
+            <Link
+              href="/register"
+              className="minimal-card rounded-2xl p-6 transition-minimal hover:shadow-minimal group block text-left active:scale-[0.99]"
+            >
+              <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-800 border border-amber-200/60 flex items-center justify-center mb-5 font-bold group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                <AlertTriangle className="w-5 h-5 text-amber-700 group-hover:text-white" />
               </div>
               <h3 className="text-lg font-bold text-slate-900 mb-2">Detect</h3>
               <p className="text-slate-600 text-xs leading-relaxed mb-4">
                 Find important clauses and potential areas for review including auto-renewals, non-competes, and broad liability.
               </p>
-              <span className="text-xs text-slate-900 font-bold flex items-center gap-1">
+              <span className="text-xs text-slate-900 font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
                 Attention Area Radar →
               </span>
-            </div>
+            </Link>
 
             {/* Card 3: Compare */}
-            <div className="minimal-card rounded-2xl p-6 transition-minimal hover:shadow-minimal">
-              <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-900 flex items-center justify-center mb-5 font-bold">
-                <Layers className="w-5 h-5 text-slate-800" />
+            <Link
+              href="/compare"
+              className="minimal-card rounded-2xl p-6 transition-minimal hover:shadow-minimal group block text-left active:scale-[0.99]"
+            >
+              <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-900 flex items-center justify-center mb-5 font-bold group-hover:bg-slate-900 group-hover:text-white transition-colors">
+                <Layers className="w-5 h-5 text-slate-800 group-hover:text-white" />
               </div>
               <h3 className="text-lg font-bold text-slate-900 mb-2">Compare</h3>
               <p className="text-slate-600 text-xs leading-relaxed mb-4">
                 See what changed between two contract versions with side-by-side added, removed, and modified clause highlights.
               </p>
-              <span className="text-xs text-slate-900 font-bold flex items-center gap-1">
+              <span className="text-xs text-slate-900 font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
                 Side-by-Side Diff →
               </span>
-            </div>
+            </Link>
 
             {/* Card 4: Ask */}
-            <div className="minimal-card rounded-2xl p-6 transition-minimal hover:shadow-minimal">
-              <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-900 flex items-center justify-center mb-5 font-bold">
-                <HelpCircle className="w-5 h-5 text-slate-800" />
+            <Link
+              href="/register"
+              className="minimal-card rounded-2xl p-6 transition-minimal hover:shadow-minimal group block text-left active:scale-[0.99]"
+            >
+              <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-900 flex items-center justify-center mb-5 font-bold group-hover:bg-slate-900 group-hover:text-white transition-colors">
+                <HelpCircle className="w-5 h-5 text-slate-800 group-hover:text-white" />
               </div>
               <h3 className="text-lg font-bold text-slate-900 mb-2">Ask</h3>
               <p className="text-slate-600 text-xs leading-relaxed mb-4">
                 Ask questions and get answers grounded strictly in your document with exact page and clause citations.
               </p>
-              <span className="text-xs text-slate-900 font-bold flex items-center gap-1">
+              <span className="text-xs text-slate-900 font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
                 Grounded Source Q&A →
               </span>
-            </div>
+            </Link>
           </div>
         </div>
       </section>

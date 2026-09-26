@@ -67,10 +67,10 @@ async def upload_document(
         clean_filename = "document.pdf"
 
     ext = os.path.splitext(clean_filename)[1].lower()
-    if ext not in {".pdf", ".docx", ".doc"}:
+    if ext not in {".pdf", ".docx", ".doc", ".txt"}:
         raise HTTPException(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            detail="Invalid file type. Only PDF and DOCX files are supported.",
+            detail="Invalid file type. Only PDF, DOCX, and TXT files are supported.",
         )
 
     # --- Read & size-check before persisting ---
@@ -83,6 +83,10 @@ async def upload_document(
         )
 
     # --- Save to isolated user upload directory ---
+    try:
+        os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+    except Exception:
+        pass
     save_path = os.path.join(settings.UPLOAD_DIR, f"{current_user.id}_{clean_filename}")
     try:
         with open(save_path, "wb") as buf:
@@ -91,7 +95,7 @@ async def upload_document(
         logger.error(f"Failed to write upload file: {e}")
         raise HTTPException(status_code=500, detail="Failed to save uploaded file.")
 
-    doc_type = "PDF" if ext == ".pdf" else "DOCX"
+    doc_type = "PDF" if ext == ".pdf" else ("DOCX" if ext in {".docx", ".doc"} else "TXT")
 
     # --- Create DB record ---
     new_doc = Document(
