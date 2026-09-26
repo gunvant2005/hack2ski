@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Scale, Lock, Mail, ArrowRight, AlertCircle, Eye, EyeOff } from 'lucide-react';
-import { loginUser } from '../../lib/api';
+import { Scale, Lock, Mail, ArrowRight, AlertCircle, Eye, EyeOff, Sparkles } from 'lucide-react';
+import { loginUser, loginAsDemoUser } from '../../lib/api';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -23,13 +23,17 @@ export default function LoginPage() {
       await loginUser(email.trim(), password);
       router.push('/dashboard');
     } catch (err: any) {
-      const detail = err.response?.data?.detail;
-      const msg = Array.isArray(detail)
-        ? detail.map((d: any) => d.msg || JSON.stringify(d)).join(', ')
-        : typeof detail === 'string'
-        ? detail
-        : 'Invalid email or password. Please verify your credentials.';
-      setError(msg);
+      if (!err.response) {
+        setError('Cannot connect to backend server. Make sure the backend is running, or use Instant Demo Access below.');
+      } else {
+        const detail = err.response?.data?.detail;
+        const msg = Array.isArray(detail)
+          ? detail.map((d: any) => d.msg || JSON.stringify(d)).join(', ')
+          : typeof detail === 'string'
+          ? detail
+          : 'Invalid email or password. Please verify your credentials.';
+        setError(msg);
+      }
     } finally {
       setLoading(false);
     }
@@ -109,6 +113,24 @@ export default function LoginPage() {
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
+
+        <div className="relative flex py-1 items-center">
+          <div className="flex-grow border-t border-slate-200"></div>
+          <span className="flex-shrink mx-3 text-slate-400 text-[11px] font-semibold uppercase">Or</span>
+          <div className="flex-grow border-t border-slate-200"></div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            loginAsDemoUser();
+            router.push('/dashboard');
+          }}
+          className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs transition-colors flex items-center justify-center gap-2"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-slate-700" />
+          <span>⚡ Instant Demo Access (1-Click)</span>
+        </button>
 
         <div className="pt-2 border-t border-slate-100 text-center">
           <p className="text-xs text-slate-500">

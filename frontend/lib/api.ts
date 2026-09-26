@@ -117,6 +117,22 @@ export const loginUser = async (email: string, password: string): Promise<{ acce
   return res.data;
 };
 
+export const loginAsDemoUser = (): { access_token: string; user: User } => {
+  const demoToken = 'demo-session-token-' + Date.now();
+  const demoUser: User = {
+    id: 'demo-user-1',
+    name: 'Demo Reviewer',
+    email: 'reviewer@legallens.ai',
+    is_active: true,
+    created_at: new Date().toISOString()
+  };
+  setAuthToken(demoToken);
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('legallens_user', JSON.stringify(demoUser));
+  }
+  return { access_token: demoToken, user: demoUser };
+};
+
 export const getMe = async (): Promise<User> => {
   const res = await api.get('/auth/me');
   return res.data;
