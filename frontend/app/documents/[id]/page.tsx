@@ -29,7 +29,8 @@ import {
   getDocumentRisks,
   getDocumentChecklist,
   getLawyerQuestions,
-  askDocumentQuestion
+  askDocumentQuestion,
+  getChatHistory
 } from '../../../lib/api';
 
 export default function DocumentAnalysisPage() {
@@ -101,6 +102,21 @@ export default function DocumentAnalysisPage() {
       setRisksData({ risk_level: analysis.risk_level, risks: analysis.risks || [] });
       setChecklistData(analysis.checklist || []);
       setLawyerQuestionsData(analysis.lawyer_questions || []);
+
+      try {
+        const history = await getChatHistory(documentId);
+        if (history && history.length > 0) {
+          setChatMessages(
+            history.map((m: any) => ({
+              role: m.role,
+              text: m.message,
+              sources: m.sources || []
+            }))
+          );
+        }
+      } catch (hErr) {
+        // Chat history is optional
+      }
     } catch (err: any) {
       console.error('Analysis load error:', err);
       setError(err.response?.data?.detail || 'Failed to complete document analysis. Please click Retry.');
