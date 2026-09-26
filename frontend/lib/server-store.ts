@@ -260,7 +260,7 @@ export function getUserById(userId: string): User | null {
 export function listDocumentsStore(userId: string): DocumentItem[] {
   ensureSeedData();
   const list: DocumentItem[] = [];
-  for (const doc of documents.values()) {
+  documents.forEach((doc) => {
     list.push({
       id: doc.id,
       user_id: doc.userId,
@@ -270,7 +270,7 @@ export function listDocumentsStore(userId: string): DocumentItem[] {
       risk_level: doc.riskLevel,
       created_at: doc.createdAt
     });
-  }
+  });
   return list;
 }
 

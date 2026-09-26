@@ -23,17 +23,20 @@ export default function LoginPage() {
       await loginUser(email.trim(), password);
       router.push('/dashboard');
     } catch (err: any) {
-      if (!err.response) {
-        setError('Cannot connect to backend server. Make sure the backend is running, or use Instant Demo Access below.');
-      } else {
-        const detail = err.response?.data?.detail;
-        const msg = Array.isArray(detail)
-          ? detail.map((d: any) => d.msg || JSON.stringify(d)).join(', ')
-          : typeof detail === 'string'
-          ? detail
-          : 'Invalid email or password. Please verify your credentials.';
-        setError(msg);
-      }
+      const serverDetail = err.response?.data?.detail;
+      const serverMsg = Array.isArray(serverDetail)
+        ? serverDetail.map((d: any) => d.msg || (typeof d === 'string' ? d : JSON.stringify(d))).join(', ')
+        : typeof serverDetail === 'string'
+        ? serverDetail
+        : null;
+
+      const displayError =
+        serverMsg ||
+        err.response?.data?.message ||
+        err.message ||
+        'Unable to sign in. Please verify your email and password.';
+
+      setError(displayError);
     } finally {
       setLoading(false);
     }
