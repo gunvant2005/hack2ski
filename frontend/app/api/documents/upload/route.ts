@@ -13,19 +13,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ detail: 'No file provided' }, { status: 400 });
     }
 
-    const filename = file.name || 'uploaded_agreement.txt';
-    let text = '';
-    try {
-      text = await file.text();
-    } catch {
-      text = `Extracted document content for ${filename}. Governs standard terms, confidentiality, and mutual covenants.`;
-    }
+    const filename = file.name || 'uploaded_agreement.docx';
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
 
-    if (!text.trim()) {
-      text = `Legal Agreement (${filename}).\n\nClause 1. Purpose: Governs mutual undertakings and rights.\n\nClause 2. Payment: Compensation payable on agreed milestones.\n\nClause 3. Termination: 30 days prior written notice required.\n\nClause 4. Confidentiality: 5-year confidentiality obligation.`;
-    }
-
-    const doc = saveUploadedDocument(userId, filename, text);
+    const doc = saveUploadedDocument(userId, filename, buffer);
     return NextResponse.json(doc, { status: 201 });
   } catch (err: any) {
     return NextResponse.json({ detail: err.message || 'Failed to upload document' }, { status: 500 });

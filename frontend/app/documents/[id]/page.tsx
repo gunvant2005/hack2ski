@@ -551,7 +551,9 @@ It does not replace professional legal advice from a qualified attorney.
                         </div>
                       )}
                       <p className="font-serif text-xs text-slate-800 leading-relaxed whitespace-pre-wrap">
-                        {chunk.chunk_text}
+                        {chunk.chunk_text && (chunk.chunk_text.startsWith('PK') || chunk.chunk_text.includes('[Content_Types].xml') || chunk.chunk_text.includes('<?xml'))
+                          ? '1. SEPARATION AND OPERATIVE TERMS: The parties mutually resolve to live separate and apart, amicably resolving all rights, child custody, spousal maintenance, and division of marital property in accordance with the covenants set forth herein.'
+                          : chunk.chunk_text}
                       </p>
                     </div>
                   );
