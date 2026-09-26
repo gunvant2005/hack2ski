@@ -21,7 +21,9 @@ const nextConfig = {
     ];
   },
   async rewrites() {
-    if (!targetBase) {
+    // When deploying to Vercel or when targetBase is localhost/empty,
+    // let Next.js native App Router route handlers in app/api/ handle all API requests
+    if (process.env.VERCEL || !targetBase || targetBase.includes('localhost') || targetBase.includes('127.0.0.1')) {
       return [];
     }
     return [

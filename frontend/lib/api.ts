@@ -13,7 +13,23 @@ import {
 } from './types';
 
 const envApi = process.env.NEXT_PUBLIC_API_URL || '';
-const API_BASE_URL = (envApi && !envApi.includes('backend-mauve-nu-93')) ? envApi : '/api';
+
+const getBaseApiUrl = (): string => {
+  if (typeof window !== 'undefined') {
+    // Over HTTPS (e.g. Vercel deployment), never attempt mixed-content localhost HTTP calls
+    if (window.location.protocol === 'https:') {
+      return '/api';
+    }
+    // On domains other than localhost, use relative routes
+    const host = window.location.hostname;
+    if (host !== 'localhost' && host !== '127.0.0.1') {
+      return '/api';
+    }
+  }
+  return (envApi && !envApi.includes('backend-mauve-nu-93')) ? envApi : '/api';
+};
+
+const API_BASE_URL = getBaseApiUrl();
 
 // ---------------------------------------------------------------------------
 // Token helpers — SSR-safe wrappers
@@ -319,8 +335,25 @@ export const getMe = async (): Promise<User> => {
 // Document APIs
 // ---------------------------------------------------------------------------
 export const getDocuments = async (): Promise<DocumentItem[]> => {
-  const res = await api.get('/documents');
-  return res.data;
+  try {
+    const res = await api.get('/documents');
+    if (Array.isArray(res.data) && typeof window !== 'undefined') {
+      localStorage.setItem('legallens_documents', JSON.stringify(res.data));
+    }
+    return res.data;
+  } catch (err) {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('legallens_documents');
+      if (stored) {
+        try {
+          return JSON.parse(stored);
+        } catch {
+          // ignore
+        }
+      }
+    }
+    throw err;
+  }
 };
 
 export const uploadDocument = async (
@@ -338,6 +371,18 @@ export const uploadDocument = async (
         }
       : undefined,
   });
+
+  if (res.data?.id && typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem('legallens_documents');
+      const list: DocumentItem[] = raw ? JSON.parse(raw) : [];
+      const updated = [res.data, ...list.filter((d) => d.id !== res.data.id)];
+      localStorage.setItem('legallens_documents', JSON.stringify(updated));
+    } catch {
+      // ignore
+    }
+  }
+
   return res.data;
 };
 
@@ -383,6 +428,17 @@ export const getLawyerQuestions = async (id: string): Promise<string[]> => {
 
 export const deleteDocument = async (id: string): Promise<{ message: string; id: string }> => {
   const res = await api.delete(`/documents/${id}`);
+  if (typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem('legallens_documents');
+      if (raw) {
+        const list: DocumentItem[] = JSON.parse(raw);
+        localStorage.setItem('legallens_documents', JSON.stringify(list.filter((d) => d.id !== id)));
+      }
+    } catch {
+      // ignore
+    }
+  }
   return res.data;
 };
 

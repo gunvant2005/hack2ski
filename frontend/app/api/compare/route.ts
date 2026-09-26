@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { compareDocsStore } from '../../../lib/server-store';
+import { compareDocsStore, extractTextFromFile } from '../../../lib/server-store';
 
 export async function POST(req: Request) {
   try {
@@ -15,7 +15,8 @@ export async function POST(req: Request) {
     if (docA) {
       nameA = docA.name || 'Document Version A';
       try {
-        textA = await docA.text();
+        const bufA = Buffer.from(await docA.arrayBuffer());
+        textA = extractTextFromFile(nameA, bufA);
       } catch {
         textA = 'Sample terms for Document A.';
       }
@@ -23,7 +24,8 @@ export async function POST(req: Request) {
     if (docB) {
       nameB = docB.name || 'Document Version B';
       try {
-        textB = await docB.text();
+        const bufB = Buffer.from(await docB.arrayBuffer());
+        textB = extractTextFromFile(nameB, bufB);
       } catch {
         textB = 'Sample terms for Document B.';
       }
