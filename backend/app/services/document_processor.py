@@ -49,7 +49,6 @@ def extract_text_from_file(file_path: str) -> List[Dict[str, Any]]:
                 p_text = paragraph.text.strip()
                 if p_text:
                     current_page_text.append(p_text)
-                # Approximate page break per ~250 words for DOCX
                 if len("\n".join(current_page_text).split()) > 350:
                     pages_data.append({
                         "page_number": page_num,
@@ -64,14 +63,50 @@ def extract_text_from_file(file_path: str) -> List[Dict[str, Any]]:
                     "text": "\n".join(current_page_text)
                 })
         except Exception:
-            pass
+            # Fallback: pure standard library zipfile + XML extraction
+            try:
+                import zipfile
+                import xml.etree.ElementTree as ET
+                with zipfile.ZipFile(file_path, "r") as z:
+                    xml_bytes = z.read("word/document.xml")
+                root = ET.fromstring(xml_bytes)
+                ns = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+                paras = []
+                for p in root.iter(f"{{{ns}}}p"):
+                    texts = [t.text for t in p.iter(f"{{{ns}}}t") if t.text]
+                    if texts:
+                        para_str = "".join(texts).strip()
+                        if para_str:
+                            paras.append(para_str)
+                if paras:
+                    page_num = 1
+                    current_page_text = []
+                    for p in paras:
+                        current_page_text.append(p)
+                        if len("\n".join(current_page_text).split()) > 350:
+                            pages_data.append({
+                                "page_number": page_num,
+                                "text": "\n".join(current_page_text)
+                            })
+                            page_num += 1
+                            current_page_text = []
+                    if current_page_text:
+                        pages_data.append({
+                            "page_number": page_num,
+                            "text": "\n".join(current_page_text)
+                        })
+            except Exception:
+                pass
     else:
-        # Plain text fallback
+        # Plain text fallback - ensure we never read binary ZIP or PDF files as raw text
         try:
-            with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
-                text = f.read()
-                if text.strip():
-                    pages_data.append({"page_number": 1, "text": text.strip()})
+            with open(file_path, "rb") as f:
+                header = f.read(4)
+            if not header.startswith(b"PK") and not header.startswith(b"%PDF"):
+                with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                    text = f.read()
+                    if text.strip():
+                        pages_data.append({"page_number": 1, "text": text.strip()})
         except Exception:
             pass
 
