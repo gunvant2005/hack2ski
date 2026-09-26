@@ -59,7 +59,21 @@ export interface RisksResponse {
 export interface KeyClause {
   title: string;
   clause_number?: string;
-  category: 'Payment' | 'Termination' | 'Liability' | 'Confidentiality' | 'Intellectual Property' | 'Renewal' | 'Dispute Resolution' | 'Other';
+  category:
+    | 'Payment'
+    | 'Termination'
+    | 'Liability'
+    | 'Confidentiality'
+    | 'Intellectual Property'
+    | 'Renewal'
+    | 'Dispute Resolution'
+    | 'Rights & Separation'
+    | 'Custody & Care'
+    | 'Financial Support'
+    | 'Property Division'
+    | 'Waiver & Release'
+    | 'Other'
+    | string;
   explanation: string;
   page_number?: number;
   importance: 'High' | 'Medium' | 'Low';

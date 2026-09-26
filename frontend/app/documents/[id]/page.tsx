@@ -909,8 +909,9 @@ It does not replace professional legal advice from a qualified attorney.
                   Refresh Summary
                 </button>
               </div>
-            )
-          )}
+            )}
+          </div>
+        )}
 
           {/* TAB 2: KEY CLAUSES */}
           {activeTab === 'clauses' && (
