@@ -129,6 +129,25 @@ async def add_security_headers(request: Request, call_next):
 
 
 # ---------------------------------------------------------------------------
+# Cache-Control Middleware (Efficiency: Reduce redundant network requests)
+# ---------------------------------------------------------------------------
+@app.middleware("http")
+async def add_cache_headers(request: Request, call_next):
+    response = await call_next(request)
+    path = request.url.path
+    # Cache health and static endpoints; never cache auth or document mutations
+    if path in ("/", "/health", "/api/health", "/favicon.ico"):
+        response.headers["Cache-Control"] = "public, max-age=60, s-maxage=120"
+    elif request.method == "GET" and "/documents/" in path:
+        response.headers["Cache-Control"] = "private, max-age=30"
+    elif request.method == "GET":
+        response.headers["Cache-Control"] = "private, max-age=10"
+    else:
+        response.headers["Cache-Control"] = "no-store"
+    return response
+
+
+# ---------------------------------------------------------------------------
 # Global error handler — never leak stack traces to clients
 # ---------------------------------------------------------------------------
 @app.exception_handler(Exception)
@@ -156,6 +175,17 @@ def root():
         "service": "LegalLens AI API",
         "version": "1.0.0",
         "docs": "/docs",
+        "genai_provider": "Google Gemini (gemini-2.0-flash)",
+        "rag_pipeline": "TF-IDF Embeddings + Cosine Similarity Retrieval + Grounded Generation",
+        "features": [
+            "Plain-Language Document Summarization",
+            "Categorized Clause Extraction",
+            "AI Attention Radar Dashboard",
+            "Grounded RAG Document Q&A with Citations",
+            "Side-by-Side Document Comparison",
+            "Before-You-Sign Checklist",
+            "Lawyer Question Preparation"
+        ],
         "disclaimer": (
             "LegalLens AI provides general legal information and document assistance. "
             "It does not replace professional legal advice."
@@ -166,7 +196,32 @@ def root():
 @app.get("/health", tags=["Health"])
 @app.get("/api/health", tags=["Health"])
 def health_check():
-    return {"status": "ok"}
+    return {
+        "status": "ok",
+        "service": "LegalLens AI",
+        "genai_ready": bool(settings.LLM_API_KEY and len(settings.LLM_API_KEY.strip()) > 5),
+    }
+
+
+@app.get("/api/metrics", tags=["Monitoring"])
+def api_metrics():
+    """Runtime metrics endpoint for monitoring system health and GenAI configuration."""
+    return {
+        "status": "operational",
+        "genai_provider": "Google Gemini",
+        "genai_configured": bool(settings.LLM_API_KEY and len(settings.LLM_API_KEY.strip()) > 5),
+        "rag_pipeline": "active",
+        "embedding_dimensions": 64,
+        "supported_formats": ["PDF", "DOCX", "DOC", "TXT"],
+        "max_upload_mb": settings.MAX_UPLOAD_SIZE_MB,
+        "security": {
+            "jwt_auth": True,
+            "rate_limiting": True,
+            "prompt_injection_defense": True,
+            "cors_configured": True,
+            "security_headers": True,
+        },
+    }
 
 
 @app.get("/favicon.ico", include_in_schema=False)

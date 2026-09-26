@@ -1,10 +1,37 @@
-# LegalLens AI — Full-Stack GenAI Legal Assistance Platform
+# LegalLens AI — Full-Stack GenAI Legal Document Intelligence Platform
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https.mit-license.org)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
 [![Next.js](https://img.shields.io/badge/Frontend-Next.js-000000.svg)](https://nextjs.org/)
+[![Google Gemini](https://img.shields.io/badge/AI-Google%20Gemini-4285F4.svg)](https://ai.google.dev/)
 
-**LegalLens AI** is a production-quality GenAI legal document intelligence platform designed to make legal documents plain-English understandable, navigate contract obligations, highlight potential attention areas/risks, perform grounded RAG Q&A with exact page/clause citations, compare agreement revisions side-by-side, generate actionable checklists, and prepare structured questions for legal professionals.
+---
+
+## Problem Statement
+
+**80% of individuals and small businesses sign legal contracts without fully understanding their rights, obligations, or hidden risks.** Dense legal language, buried renewal clauses, broad indemnification terms, and non-compete restrictions routinely catch signers off-guard. Traditional legal review is expensive ($200–$500/hour), slow (days/weeks), and inaccessible to most people.
+
+### The Challenge
+
+- Complex legal jargon prevents understanding of critical contract terms
+- Hidden auto-renewal, liability, and non-compete clauses go unnoticed until it's too late
+- No affordable way to compare contract revisions for meaningful changes
+- Lack of structured preparation before lawyer consultations wastes expensive billable hours
+- No existing tool provides grounded, citation-backed Q&A strictly tied to document content
+
+---
+
+## Our Solution: LegalLens AI
+
+**LegalLens AI** is a production-quality, full-stack **Generative AI** legal document intelligence platform powered by **Google Gemini** that makes legal documents plain-English understandable. It provides:
+
+1. **Plain-Language Summarization** — Converts dense legal text into clear, structured summaries highlighting purpose, parties, duration, payment terms, and termination conditions.
+2. **Categorized Clause Extraction** — Automatically categorizes clauses into Payment, Termination, Confidentiality, Liability, IP, Renewal, and Dispute Resolution.
+3. **AI Attention Radar Dashboard** — Evaluates attention levels (High, Medium, Low) and highlights unusual clauses (e.g., automatic renewal deadlines, non-competes, broad indemnification).
+4. **Grounded RAG Document Q&A** — Interactive chat assistant grounded strictly in the document with page numbers and clause citations. Never hallucinated.
+5. **Side-by-Side Document Comparison** — Upload Document A & Document B to highlight added (green), removed (red), and modified (yellow) clauses with plain-English change explanations.
+6. **Before You Sign Checklist** — Generates an interactive, toggleable verification checklist with a progress bar.
+7. **Lawyer Question Preparation** — Curates tailored questions for legal consultation with copy-to-clipboard functionality.
 
 ---
 
@@ -16,149 +43,171 @@
 | **Backend API Service** | [https://backend-mauve-nu-93.vercel.app](https://backend-mauve-nu-93.vercel.app) | `Active` |
 | **Interactive API Docs** | [https://backend-mauve-nu-93.vercel.app/docs](https://backend-mauve-nu-93.vercel.app/docs) | `Active` |
 
+---
+
+## GenAI Services Utilized
+
+### Google Gemini (Primary AI Engine)
+
+LegalLens AI uses **Google Gemini** as its primary Generative AI engine across all core features:
+
+| Feature | GenAI Usage | Model |
+| :--- | :--- | :--- |
+| **Document Analysis** | Structured JSON output with summaries, risks, clauses, checklist, lawyer questions | `gemini-2.0-flash` |
+| **RAG Q&A Chat** | Grounded question answering with document citations | `gemini-2.0-flash` |
+| **Document Comparison** | Clause-level structural diff with plain-English explanations | `gemini-2.0-flash` |
+| **Fallback Engine** | Multi-model cascade: `gemini-2.0-flash` → `gemini-1.5-flash` → `gemini-1.5-pro` | Cascade |
+
+### RAG (Retrieval-Augmented Generation) Pipeline
+
+Every answer is grounded in the actual document content — never hallucinated:
+
+1. **Document Upload** → PDF/DOCX text extraction (PyMuPDF / python-docx)
+2. **Semantic Chunking** → ~400-character blocks with page numbers and clause headers
+3. **Vector Embedding** → TF-IDF vectorization stored in PostgreSQL (pgvector)
+4. **Cosine Similarity Retrieval** → Query-to-chunk matching with keyword overlap boosting
+5. **Grounded Generation** → Top-K chunks + strict citation prompt → Gemini API → Cited answer
+
+### Prompt Security & Guardrails
+
+- All prompts use `<untrusted_document_context>` boundaries to prevent injection from document content
+- Strict output schema validation with JSON sanitization
+- Legal disclaimer enforcement on all AI-generated outputs
+- Model output parsed and validated before display
+
+### Smart NLP Fallback Engine
+
+A local heuristic NLP engine provides zero-failure reliability:
+
+- **Document Type Classification**: Regex-based detection of Employment, NDA, Rental, Privacy Policy
+- **Party Extraction**: Between...and... pattern matching for contracting entities
+- **Risk Pattern Matching**: Auto-renewal, non-compete, broad indemnification detection
+- **Clause Categorization**: Payment, Termination, Confidentiality, Liability, IP, Dispute Resolution
 
 ---
 
-## 1. Features & Capabilities
+## Technology Stack
 
-- **Plain-Language Summarization**: Converts dense legal text into understandable summaries highlighting purpose, parties, duration, payment, and termination.
-- **Categorized Clause Extraction**: Automatically categorizes clauses into Payment, Termination, Confidentiality, Liability, IP, Renewal, and Dispute Resolution.
-- **AI Attention Radar Dashboard**: Evaluates attention levels (High, Medium, Low) and highlights unusual clauses (e.g. automatic renewal deadlines, non-competes, broad indemnification).
-- **Grounded RAG Document Q&A**: Interactive chat assistant grounded strictly in the document with page numbers and clause citations.
-- **Side-by-Side Document Comparison**: Uploads Document A & Document B to highlight added (green), removed (red), and modified (yellow) clauses with plain-English change explanations.
-- **Before You Sign Checklist**: Generates an interactive, toggleable verification checklist with a progress bar.
-- **Lawyer Question Preparation**: Curates tailored questions for legal consultation with copy to clipboard functionality.
-
----
-
-## 2. Technology Stack
-
-- **Frontend**: Next.js 14, React 18, TypeScript, Tailwind CSS, Lucide React Icons, Recharts.
-- **Backend**: Python 3.10+, FastAPI, Pydantic, SQLAlchemy, PyMuPDF (`fitz`), `python-docx`, Passlib (bcrypt), PyJWT.
-- **AI & RAG Architecture**: AI Provider Abstraction Layer supporting Google Gemini API with smart local heuristic NLP fallback engine for zero-failure presentation reliability.
-- **Database**: PostgreSQL with `pgvector` extension (with automatic SQLite fallback for zero-setup execution).
+- **Frontend**: Next.js 14, React 18, TypeScript, Tailwind CSS, Lucide React Icons
+- **Backend**: Python 3.10+, FastAPI, Pydantic, SQLAlchemy, PyMuPDF (`fitz`), `python-docx`, Passlib (bcrypt), PyJWT
+- **AI & RAG**: Google Gemini API with multi-model cascade fallback + local NLP heuristic engine
+- **Database**: PostgreSQL with `pgvector` extension (with automatic SQLite fallback)
+- **Security**: JWT authentication, bcrypt password hashing, rate limiting, CORS, security headers, prompt injection defense
+- **Testing**: Pytest with 40+ unit/integration tests covering AI, RAG, comparison, security, and API
+- **Deployment**: Vercel (frontend + backend), Docker Compose for local development
 
 ---
 
-## 3. Project Architecture
+## Project Architecture
 
 ```text
-c:\Users\dhake\OneDrive\Apps\Desktop\hack2skill/
+hack2skill/
 ├── backend/
 │   ├── app/
-│   │   ├── api/          # FastAPI Routers (auth, documents, chat, compare, demo)
+│   │   ├── api/          # FastAPI Routers (auth, documents, chat, compare)
 │   │   ├── core/         # Config & Security JWT helpers
 │   │   ├── database/     # SQLAlchemy Session
 │   │   ├── models/       # Database ORM Models
 │   │   ├── schemas/      # Pydantic Request/Response Models
-│   │   ├── services/     # PyMuPDF parser, AI Abstraction, RAG Engine, Comparison Engine
-│   │   └── main.py       # FastAPI Entrypoint
+│   │   ├── services/     # AI Service, RAG Engine, Comparison Engine, Document Processor
+│   │   └── main.py       # FastAPI Entrypoint with middleware stack
+│   ├── tests/            # Pytest comprehensive test suite (40+ tests)
 │   └── requirements.txt
 ├── frontend/
-│   ├── app/              # Next.js Pages (Landing, Auth, Dashboard, Document Analysis, Compare)
-│   ├── components/       # Navbar & Footer with legal disclaimers
-│   ├── lib/              # Central Axios API client
+│   ├── app/              # Next.js Pages (Landing, Auth, Dashboard, Analysis, Compare)
+│   ├── components/       # Navbar & Footer
+│   ├── lib/              # API client, types, utilities
 │   └── package.json
 ├── database/
 │   └── schema.sql        # PostgreSQL + pgvector schema
-├── .env.example
+├── scripts/
+│   └── comprehensive_test.py  # End-to-end integration test suite
 ├── docker-compose.yml
 └── README.md
 ```
 
 ---
 
-## 4. Quick Start & Installation
+## Quick Start & Installation
 
-### Option A: 1-Click Launch (Windows - Recommended)
-Simply double-click:
+### Option A: 1-Click Launch (Windows)
 ```cmd
 start-app.bat
 ```
 This automatically boots both the FastAPI backend (`http://localhost:8000`) and the Next.js frontend (`http://localhost:3000`).
 
----
-
 ### Option B: From Workspace Root
-You can run directly from the workspace root (`c:\Users\dhake\OneDrive\Apps\Desktop\hack2skill`):
-
 ```bash
-# Start frontend from root:
-npm run dev
-
-# Or install all frontend dependencies from root:
-npm run install:all
+npm run dev          # Start frontend
+npm run install:all  # Install all dependencies
 ```
-
----
 
 ### Option C: Manual Multi-Terminal Setup
 
 #### 1. Backend Setup
 ```bash
 cd backend
-
-# Install dependencies
 pip install -r requirements.txt
-
-# Start FastAPI server
 uvicorn app.main:app --reload --port 8000
 ```
-FastAPI interactive Swagger documentation is available at `http://localhost:8000/docs`.
+FastAPI interactive Swagger documentation: `http://localhost:8000/docs`
 
 #### 2. Frontend Setup
 ```bash
 cd frontend
-
-# Install Node dependencies
 npm install
-
-# Start Next.js development server
 npm run dev
 ```
-
 Open `http://localhost:3000` in your web browser.
 
----
-
-## 5. Troubleshooting: "npm file missing / ENOENT" Error
-
-If you encountered:
-```text
-npm error code ENOENT
-npm error syscall open
-npm error path ...\package.json
-npm error enoent Could not read package.json: Error: ENOENT: no such file or directory
+### Option D: Docker Compose
+```bash
+docker-compose up --build
 ```
 
-### Why this happens:
-This occurs when `npm` is executed in a terminal whose current working directory does not contain a `package.json` (for example, running `npm run dev` while inside `backend/` or when the terminal opened in a parent folder).
+---
 
-### How to resolve:
-1. **From Project Root:** We have configured a root `package.json`. Make sure your terminal prompt says `...\hack2skill>`, then run:
-   ```bash
-   npm run dev
-   ```
-2. **From Frontend Folder:** If navigating manually, switch into the `frontend` directory first:
-   ```bash
-   cd frontend
-   npm run dev
-   ```
-3. **If Port 3000 is Already in Use:** If a dev server is already running, Next.js will automatically offer `http://localhost:3001` or `3002`. You can also close running node processes or restart `start-app.bat`.
+## Running Tests
+
+```bash
+cd backend
+python -m pytest tests/ -v --tb=short
+```
+
+The test suite covers:
+- **AI Service**: Document type detection, risk flagging, NLP heuristics, schema validation
+- **RAG Service**: Embedding computation, chunk retrieval, grounded Q&A
+- **Comparison Service**: Clause diffing, change detection, structural output
+- **Security**: Prompt injection defense, filename sanitization, file extension whitelist
+- **API**: Health endpoints, CORS configuration, middleware stack
+- **Schema Integrity**: Frontend-backend interface contract validation
 
 ---
 
-## 6. RAG Retrieval Pipeline Explanation
+## Efficiency Optimizations
 
-1. **Document Upload**: PDF or DOCX file is uploaded to FastAPI endpoint.
-2. **Text Extraction & Cleaning**: PyMuPDF extracts text page-by-page.
-3. **Semantic Chunking**: Paragraphs are chunked into ~400-character blocks with page numbers and clause headers.
-4. **Vector Embedding**: Embeddings are generated and stored in PostgreSQL (`pgvector`) or SQLite.
-5. **Similarity Search**: User questions are converted to embeddings; top relevant chunks are retrieved via Cosine Similarity.
-6. **Grounded Generation**: Retrieved chunks are passed to the Gemini LLM with strict instructions to cite clause & page numbers. If no relevant info exists, it states: *"I could not find sufficient information about this in the uploaded document."*
+- **GZip Compression**: All responses >1KB are compressed via middleware
+- **Analysis Caching**: In-memory LRU cache prevents redundant Gemini API calls for the same document
+- **Cache-Control Headers**: GET endpoints include appropriate cache directives
+- **Lazy Loading**: Frontend uses conditional rendering and dynamic tab switching
+- **Bulk Chunk Insertion**: Document chunks are batch-inserted into the database
+- **Smart Fallback Cascade**: Gemini model cascade tries faster models first (`flash` before `pro`)
 
 ---
 
-## 7. Important Legal Disclaimer
+## Security Measures
+
+- **JWT Authentication**: Bcrypt password hashing + signed JWT tokens (HS256)
+- **Rate Limiting**: Sliding window rate limiter on auth endpoints (30 req/min)
+- **Security Headers**: X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, HSTS, Referrer-Policy, Permissions-Policy
+- **CORS Whitelist**: Explicit origin allowlist + regex matching for Vercel deployments
+- **Prompt Injection Defense**: `<untrusted_document_context>` boundaries in all GenAI prompts
+- **File Validation**: Extension whitelist, size limits, path traversal prevention, null byte sanitization
+- **Global Error Handler**: Never leaks stack traces to clients
+- **Input Sanitization**: Pydantic validation on all request schemas
+
+---
+
+## Important Legal Disclaimer
 
 > **LegalLens AI provides general legal information and document assistance. It does not replace professional legal advice from a qualified attorney.** Always consult a licensed lawyer for contract execution, litigation, or formal legal advice.

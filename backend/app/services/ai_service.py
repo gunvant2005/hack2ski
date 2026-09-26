@@ -2,26 +2,56 @@ import os
 import json
 import re
 import logging
+import hashlib
+from functools import lru_cache
 from typing import Dict, Any, List
 from app.core.config import settings
 
 logger = logging.getLogger("legallens.ai")
 
+
+# ---------------------------------------------------------------------------
+# In-memory analysis cache (Efficiency: avoid redundant Gemini API calls)
+# ---------------------------------------------------------------------------
+_analysis_cache: Dict[str, Dict[str, Any]] = {}
+_CACHE_MAX_SIZE = 50
+
+
+def _cache_key(filename: str, text: str) -> str:
+    """Generate a stable cache key from filename and document text hash."""
+    text_hash = hashlib.sha256(text[:4000].encode("utf-8", errors="ignore")).hexdigest()[:16]
+    return f"{filename}:{text_hash}"
+
 def analyze_document_content(filename: str, full_text: str, chunks: List[Dict[str, Any]]) -> Dict[str, Any]:
     """
     Main entry point for document analysis.
     Uses Google Gemini if API key is provided, or falls back to intelligent NLP heuristic analysis.
+    Results are cached in-memory to avoid redundant API calls.
     """
+    # Check cache first (Efficiency: skip redundant analysis)
+    key = _cache_key(filename, full_text)
+    if key in _analysis_cache:
+        logger.info(f"Cache hit for document: {filename}")
+        return _analysis_cache[key]
+
     api_key = settings.LLM_API_KEY
 
     if api_key and len(api_key.strip()) > 5:
         try:
-            return _analyze_with_gemini(api_key, filename, full_text, chunks)
+            result = _analyze_with_gemini(api_key, filename, full_text, chunks)
         except Exception as e:
             logger.warning(f"Gemini API call failed: {e}. Falling back to NLP engine.")
-            return _analyze_with_heuristic_nlp(filename, full_text, chunks)
+            result = _analyze_with_heuristic_nlp(filename, full_text, chunks)
     else:
-        return _analyze_with_heuristic_nlp(filename, full_text, chunks)
+        result = _analyze_with_heuristic_nlp(filename, full_text, chunks)
+
+    # Store in cache (evict oldest if full)
+    if len(_analysis_cache) >= _CACHE_MAX_SIZE:
+        oldest_key = next(iter(_analysis_cache))
+        del _analysis_cache[oldest_key]
+    _analysis_cache[key] = result
+
+    return result
 
 
 def _analyze_with_gemini(api_key: str, filename: str, full_text: str, chunks: List[Dict[str, Any]]) -> Dict[str, Any]:
