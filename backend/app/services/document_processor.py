@@ -10,7 +10,7 @@ logger = logging.getLogger("legallens.document_processor")
 # Helpers: RTF stripping (stdlib-only fallback — no external dep required)
 # ---------------------------------------------------------------------------
 def _strip_rtf(rtf_text: str) -> str:
-    """
+    r"""
     Minimal but robust RTF -> plaintext converter using regex.
     Handles \controlwords, braces, \'hh hex escapes, and skips fonttbl/colortbl/stylesheet info groups.
     """
