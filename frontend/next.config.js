@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
-const envBackend = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_API_URL || '';
-const hasExternalBackend = Boolean(envBackend && envBackend.startsWith('http') && !envBackend.includes('backend-mauve-nu-93'));
+const envBackend = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_API_URL || 'https://backend-eight-ecru-95.vercel.app';
+const hasExternalBackend = Boolean(envBackend && envBackend.startsWith('http'));
 const cleanBackend = hasExternalBackend ? (envBackend.endsWith('/') ? envBackend.slice(0, -1) : envBackend) : '';
 const targetBase = cleanBackend ? (cleanBackend.endsWith('/api') ? cleanBackend : `${cleanBackend}/api`) : '';
 

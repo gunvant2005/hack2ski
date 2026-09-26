@@ -26,7 +26,7 @@ const getBaseApiUrl = (): string => {
       return '/api';
     }
   }
-  return (envApi && !envApi.includes('backend-mauve-nu-93')) ? envApi : '/api';
+  return envApi ? (envApi.endsWith('/') ? envApi.slice(0, -1) : envApi) : '/api';
 };
 
 const API_BASE_URL = getBaseApiUrl();

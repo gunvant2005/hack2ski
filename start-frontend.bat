@@ -46,8 +46,8 @@ if not defined NPM_CMD (
     echo.
     echo NOTE: The full LegalLens AI web application is ALREADY LIVE in production:
     echo ========================================================================
-    echo Frontend URL: https://frontend-ten-rouge-36.vercel.app
-    echo Backend Docs: https://backend-mauve-nu-93.vercel.app/docs
+    echo Frontend URL: https://hack2ski-frontend-gunvants-projects-43dc627e.vercel.app
+    echo Backend Docs: https://backend-eight-ecru-95.vercel.app/docs
     echo ========================================================================
     echo You can use the live URL immediately without installing local Node.js!
     echo.
